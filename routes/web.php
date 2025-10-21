@@ -13,6 +13,8 @@ use App\Http\Controllers\ParticipaEnController;
 use App\Http\Controllers\InstitucionController;
 use App\Http\Controllers\AreaIntervencionController;
 use App\Http\Controllers\CodigoActividadController;
+// Controladores de API
+use App\Http\Controllers\AsistenciaSesionController; // <<< ¡NUEVO USE!
 // Controladores de autenticación
 use App\Http\Controllers\Auth\LoginController;
 
@@ -52,13 +54,10 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     })->name('admin.dashboard');
 
     // ** RUTAS CRUD PARA CATÁLOGOS **
-
     // 1. INSTITUCIONES
     Route::resource('institucion', InstitucionController::class);
-
     // 2. ÁREAS DE INTERVENCIÓN
     Route::resource('area', AreaIntervencionController::class);
-
     // 3. CÓDIGOS DE ACTIVIDAD
     Route::resource('codigo', CodigoActividadController::class);
 
@@ -66,17 +65,14 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     
     // 4. PERSONAS
     Route::resource('persona', PersonaController::class);
-
     // 5. BENEFICIARIOS (Usando id_persona como clave)
     Route::resource('beneficiario', BeneficiarioController::class)->parameters([
         'beneficiario' => 'id_persona' 
     ]);
-
     // 6. USUARIOS (Usando id_persona como clave)
     Route::resource('usuario', UsuarioController::class)->parameters([
         'usuario' => 'id_persona' 
     ]);
-
     // 7. ACTIVIDADES
     Route::resource('actividad', ActividadController::class);
     
@@ -89,7 +85,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     
     // RUTA AÑADIDA: Enlace para el formulario de gestión de asistencia a sesión (Web)
     Route::get('sesion/{sesion}/asistencia', [SesionController::class, 'editAsistencia'])
-         ->name('sesion.asistencia.edit');
+        ->name('sesion.asistencia.edit');
     
     // 9. PARTICIPA_EN (Relación Persona - Actividad) - Rutas de API para la tabla pivote
     Route::prefix('participaen')->group(function () {
@@ -99,6 +95,20 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
         Route::put('{id_persona}/{id_actividad}', [ParticipaEnController::class, 'update'])->name('participaen.update');
         Route::delete('{id_persona}/{id_actividad}', [ParticipaEnController::class, 'destroy'])->name('participaen.destroy');
     });
+});
+
+
+// --- RUTAS DE API PARA GESTIÓN DE ASISTENCIA ---
+// Este grupo es CRÍTICO para resolver el error 404 de la llamada DELETE.
+// El prefijo 'api/asistencia-sesion' coincide con tu llamada AJAX.
+Route::middleware(['auth'])->prefix('api/asistencia-sesion')->group(function () {
+    
+    // Endpoint para guardar/actualizar (POST /api/asistencia-sesion)
+    Route::post('/', [AsistenciaSesionController::class, 'store'])->name('api.asistencia.store');
+    
+    // Endpoint para eliminar (DELETE /api/asistencia-sesion/{id_sesion}/{id_persona})
+    Route::delete('{id_sesion}/{id_persona}', [AsistenciaSesionController::class, 'destroy'])
+         ->name('api.asistencia.destroy');
 });
 
 
