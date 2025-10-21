@@ -11,7 +11,7 @@ return new class extends Migration {
     public function up()
     {
         Schema::create('area_intervencion', function (Blueprint $table) {
-            $table->id('codigo_area');
+            $table->string('codigo_area', 20)->primary();
             $table->string('nombre_area', 100);
             $table->string('municipio', 100);
             $table->string('provincia', 100);

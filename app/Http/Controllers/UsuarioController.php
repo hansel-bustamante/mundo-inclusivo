@@ -1,67 +1,82 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Auth;
 
-use App\Models\Usuario;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
-class UsuarioController extends Controller
+class LoginController extends Controller
 {
-    public function index()
+    /**
+     * Muestra el formulario de inicio de sesión.
+     */
+    public function showLoginForm()
     {
-        return Usuario::with(['persona', 'areaIntervencion'])->get();
+        // Si el usuario ya está autenticado, lo redirigimos a su dashboard
+        if (Auth::check()) {
+            return $this->redirectToDashboard();
+        }
+        return view('auth.login'); // Asume que tienes una vista en resources/views/auth/login.blade.php
     }
 
-    public function store(Request $request)
+    /**
+     * Maneja el intento de inicio de sesión.
+     */
+    public function login(Request $request)
     {
-        $request->validate([
-            'id_persona' => 'required|exists:persona,id_persona|unique:usuario,id_persona',
-            'nombre_usuario' => 'required|string|max:50|unique:usuario,nombre_usuario',
-            'contrasena' => 'required|string|min:6',
-            'rol' => 'required|in:admin,registrador,coordinador',
-            'correo' => 'nullable|email|max:100',
-            'area_intervencion_id' => 'nullable|exists:area_intervencion,codigo_area',
+        // 1. Validar los datos de entrada
+        $credentials = $request->validate([
+            // Usamos 'nombre_usuario' como campo de login
+            'nombre_usuario' => 'required|string', 
+            'contrasena' => 'required|string',
         ]);
 
-        $usuario = Usuario::create($request->all());
+        // 2. Intentar autenticación
+        // El guard de Laravel buscará en el campo 'nombre_usuario' y verificará 'contrasena'
+        if (Auth::attempt(['nombre_usuario' => $credentials['nombre_usuario'], 'password' => $credentials['contrasena']])) {
+            
+            $request->session()->regenerate();
 
-        return response()->json($usuario, 201);
-    }
-
-    public function show($id)
-    {
-        return Usuario::with(['persona', 'areaIntervencion'])->findOrFail($id);
-    }
-
-    public function update(Request $request, $id)
-    {
-        $usuario = Usuario::findOrFail($id);
-
-        $request->validate([
-            'nombre_usuario' => 'sometimes|required|string|max:50|unique:usuario,nombre_usuario,' . $id . ',id_persona',
-            'contrasena' => 'sometimes|required|string|min:6',
-            'rol' => 'sometimes|required|in:admin,registrador,coordinador',
-            'correo' => 'nullable|email|max:100',
-            'area_intervencion_id' => 'nullable|exists:area_intervencion,codigo_area',
-        ]);
-
-        $data = $request->all();
-
-        // Si contraseña está vacía no actualizarla
-        if (empty($data['contrasena'])) {
-            unset($data['contrasena']);
+            // 3. Autenticación exitosa: Redirigir según el rol
+            return $this->redirectToDashboard();
         }
 
-        $usuario->update($data);
-
-        return response()->json($usuario);
+        // 4. Autenticación fallida
+        return back()->withErrors([
+            'nombre_usuario' => 'Las credenciales proporcionadas no coinciden con nuestros registros.',
+        ])->onlyInput('nombre_usuario');
     }
 
-    public function destroy($id)
+    /**
+     * Cierra la sesión del usuario.
+     */
+    public function logout(Request $request)
     {
-        $usuario = Usuario::findOrFail($id);
-        $usuario->delete();
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
-        return response()->json(null, 204);
+        return redirect('/');
+    }
+
+    /**
+     * Determina la redirección del usuario basado en su rol.
+     */
+    protected function redirectToDashboard()
+    {
+        $user = Auth::user();
+
+        switch ($user->rol) {
+            case 'admin':
+                return redirect()->route('admin.dashboard'); // Ruta protegida principal
+            case 'coordinador':
+                return redirect()->route('coordinador.dashboard');
+            case 'registrador':
+                return redirect()->route('registrador.dashboard');
+            default:
+                // Si el rol no está definido, simplemente redirigir a casa o logout
+                return redirect('/');
+        }
     }
 }

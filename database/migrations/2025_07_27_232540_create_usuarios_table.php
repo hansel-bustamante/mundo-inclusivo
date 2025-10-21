@@ -16,7 +16,7 @@ return new class extends Migration {
             $table->string('contrasena', 255);
             $table->enum('rol', ['admin', 'registrador', 'coordinador']);
             $table->string('correo', 100)->nullable();
-            $table->unsignedBigInteger('area_intervencion_id')->nullable();
+            $table->string('area_intervencion_id', 20)->nullable();
 
             // Foreign keys
             $table->foreign('id_persona')->references('id_persona')->on('persona')->onDelete('cascade');

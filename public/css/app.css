@@ -1,0 +1,253 @@
+/* -------------------------------------- */
+/* 1. RESET Y VARIABLES GLOBALES          */
+/* -------------------------------------- */
+
+/* Importación de Fuente (Roboto para legibilidad) */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap');
+
+/* Variables de Diseño (Centralizadas para consistencia) */
+:root {
+    /* Colores Primarios y de Énfasis */
+    --color-primary: #059669;
+    /* Verde Esmeralda (Principal) */
+    --color-primary-dark: #047857;
+    /* Verde Oscuro (Hover) */
+    --color-secondary: #fcd34d;
+    /* Ámbar (Énfasis/Alerta) */
+    --color-info: #2563eb;
+    /* Azul (Enlaces/Acciones) */
+
+    /* Paleta de Grises */
+    --color-bg-body: #f3f4f6;
+    /* Fondo Global (Gray 100) */
+    --color-bg-card: #ffffff;
+    /* Fondo de Componentes */
+    --color-sidebar-bg: #1f2937;
+    /* Fondo Barra Lateral (Gray 900) */
+    --color-border: #e5e7eb;
+    /* Bordes (Gray 200) */
+    --color-text-dark: #1f2937;
+    /* Texto Principal (Gray 900) */
+    --color-text-medium: #6b7280;
+    /* Texto Secundario (Gray 500) */
+    --color-link-light: #d1d5db;
+    /* Texto Enlace Sidebar (Gray 300) */
+    --color-link-hover: #ffffff;
+    /* Texto Hover Sidebar */
+
+    /* Layout */
+    --sidebar-width: 14rem;
+    /* 224px */
+    --transition-speed: 200ms;
+    /* Velocidad de transición general */
+}
+
+/* Reseteo y Tipografía */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: var(--color-bg-body);
+    color: var(--color-text-dark);
+    line-height: 1.6;
+    /* Interlineado ligeramente mayor para mejor lectura */
+    font-size: 16px;
+}
+
+/* -------------------------------------- */
+/* 2. LAYOUT PRINCIPAL (layouts.main)     */
+/* -------------------------------------- */
+
+.app-container {
+    display: flex;
+    min-height: 100vh;
+    position: relative;
+}
+
+/* Barra Lateral (Menú) */
+.sidebar {
+    width: var(--sidebar-width);
+    flex-shrink: 0;
+    background-color: var(--color-sidebar-bg);
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+    /* Sombra más definida */
+    padding-top: 1.5rem;
+    position: fixed;
+    height: 100%;
+    overflow-y: auto;
+    z-index: 30;
+    /* Transición para el efecto de apertura/cierre en móvil */
+    transition: transform var(--transition-speed) ease, width var(--transition-speed) ease;
+}
+
+.logo-section {
+    padding: 0 1.5rem 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    margin-bottom: 1.5rem;
+}
+
+.logo-text {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-bg-card);
+}
+
+/* Navegación */
+.nav-list {
+    list-style: none;
+    padding: 0 1rem;
+}
+
+.nav-item {
+    margin-bottom: 0.25rem;
+}
+
+/* Título de Categoría (ej: Catálogos, Otros) */
+.nav-category {
+    color: #9ca3af;
+    /* Gray 400 */
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.75rem 0.5rem 0.25rem;
+    display: block;
+    font-weight: 500;
+    margin-top: 0.5rem;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    padding: 0.6rem 0.75rem;
+    border-radius: 0.5rem;
+    color: var(--color-link-light);
+    text-decoration: none;
+    transition: background-color var(--transition-speed), color var(--transition-speed);
+}
+
+.nav-link-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-right: 0.75rem;
+}
+
+.nav-link-text {
+    font-size: 0.9375rem;
+    font-weight: 500;
+}
+
+/* Estados de Navegación */
+.nav-link:hover {
+    background-color: #374151;
+    /* Gray 700 */
+    color: var(--color-link-hover);
+}
+
+.nav-link.active {
+    background-color: var(--color-primary);
+    color: var(--color-bg-card);
+    font-weight: 700;
+    box-shadow: 0 2px 5px rgba(5, 150, 105, 0.4);
+}
+
+.nav-link.active:hover {
+    background-color: var(--color-primary-dark);
+}
+
+/* --- Logout Button (Footer de Sidebar) --- */
+.sidebar-footer {
+    padding: 1rem 1rem 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    margin-top: 1rem;
+}
+
+.logout-form {
+    width: 100%;
+}
+
+.logout-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 0.75rem;
+    border-radius: 0.5rem;
+    background: none;
+    border: none;
+    color: #9ca3af;
+    cursor: pointer;
+    text-align: left;
+    transition: background-color var(--transition-speed), color var(--transition-speed);
+}
+
+.logout-btn:hover {
+    background-color: #374151;
+    color: white;
+}
+
+/* -------------------------------------- */
+/* 3. CONTENIDO PRINCIPAL                 */
+/* -------------------------------------- */
+
+.main-content {
+    margin-left: var(--sidebar-width);
+    flex-grow: 1;
+    padding: 2rem;
+    transition: margin-left var(--transition-speed) ease;
+    /* Para transición en tablet/escritorio */
+}
+
+/* Contenido dentro del yield('content') */
+.content-area {
+    width: 100%;
+}
+
+/* -------------------------------------- */
+/* 4. RESPONSIVIDAD (MÓVIL Y TABLET)      */
+/* -------------------------------------- */
+
+@media (max-width: 1024px) {
+
+    /* Ajuste ligero para tablet */
+    :root {
+        --sidebar-width: 12.5rem;
+    }
+
+    .main-content {
+        margin-left: var(--sidebar-width);
+    }
+}
+
+@media (max-width: 767px) {
+
+    /* Enfoque Mobile-First: Ocultar la barra lateral por defecto */
+    .sidebar {
+        width: 100%;
+        transform: translateX(-100%);
+        /* Saca el menú de la pantalla */
+        padding-top: 0;
+        box-shadow: none;
+    }
+
+    /* Clase que se añade con JS para mostrar el menú */
+    .sidebar.is-open {
+        transform: translateX(0);
+    }
+
+    .main-content {
+        margin-left: 0;
+        padding: 1rem;
+    }
+
+    .logo-section {
+        padding: 1rem 1.5rem;
+    }
+
+    .sidebar-footer {
+        /* Asegura que el botón de logout sea visible aunque haya un scroll bar */
+        padding-bottom: 3rem;
+    }
+}

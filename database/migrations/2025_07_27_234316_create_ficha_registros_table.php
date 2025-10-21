@@ -17,7 +17,7 @@ return new class extends Migration {
             $table->boolean('incluido_en_educacion_2025')->default(false);
             $table->unsignedBigInteger('beneficiario_id');
             $table->unsignedBigInteger('usuario_id');
-            $table->unsignedBigInteger('area_intervencion_id');
+            $table->string('area_intervencion_id', 20);
             $table->timestamps();
 
             $table->foreign('beneficiario_id')->references('id_persona')->on('beneficiario')->onDelete('cascade');

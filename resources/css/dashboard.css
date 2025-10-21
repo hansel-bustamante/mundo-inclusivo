@@ -1,0 +1,242 @@
+/* Variables de Color (para consistencia con login.css y app.css) */
+:root {
+    --color-primary: #059669;
+    /* Green 600 - Principal */
+    --color-primary-dark: #047857;
+    /* Green 700 */
+    --color-text-dark: #1f2937;
+    /* Gray 800/900 */
+    --color-text-medium: #6b7280;
+    /* Gray 500/600 */
+    --color-border: #e5e7eb;
+    /* Gray 200/300 */
+
+    /* Colores temáticos de las tarjetas */
+    --color-card-gray: #9ca3af;
+    /* Gray 400 */
+    --color-card-indigo: #4f46e5;
+    /* Indigo 500 */
+}
+
+/* --- Layout Principal --- */
+
+/* Título de la sección */
+.section-heading {
+    font-size: 1.875rem;
+    /* 3xl */
+    font-weight: 800;
+    /* extrabold */
+    color: var(--color-text-dark);
+    margin-bottom: 1.5rem;
+    /* mb-6 */
+}
+
+/* Contenedor de las tarjetas de estadísticas */
+.stats-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    /* gap-6 */
+}
+
+/* Responsividad del Grid */
+@media (min-width: 768px) {
+
+    /* md: */
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 1024px) {
+
+    /* lg: */
+    .stats-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* --- Tarjetas de Estadísticas (Stats Cards) --- */
+
+.stat-card {
+    background-color: #ffffff;
+    padding: 1.5rem;
+    /* p-6 */
+    border-radius: 0.75rem;
+    /* rounded-xl */
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+    /* shadow-xl */
+    border-bottom: 4px solid;
+    /* border-b-4 */
+    transition: box-shadow 300ms ease;
+    cursor: default;
+}
+
+.stat-card:hover {
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    /* shadow-2xl */
+}
+
+/* Border Colors */
+.card-border-gray {
+    border-color: var(--color-card-gray);
+}
+
+.card-border-indigo {
+    border-color: var(--color-card-indigo);
+}
+
+.card-border-green {
+    border-color: var(--color-primary);
+}
+
+/* Contenido de la tarjeta */
+.card-content-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.card-label {
+    font-size: 0.875rem;
+    /* text-sm */
+    font-weight: 500;
+    /* medium */
+    color: var(--color-text-medium);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    /* tracking-wider */
+}
+
+.card-icon {
+    width: 2rem;
+    /* w-8 */
+    height: 2rem;
+    /* h-8 */
+}
+
+.card-icon-gray {
+    color: var(--color-card-gray);
+}
+
+.card-icon-indigo {
+    color: var(--color-card-indigo);
+}
+
+.card-icon-green {
+    color: var(--color-primary);
+}
+
+.card-value {
+    font-size: 2.25rem;
+    /* 4xl */
+    font-weight: 800;
+    /* extabold */
+    color: var(--color-text-dark);
+    margin-top: 0.5rem;
+    /* mt-2 */
+}
+
+.card-description {
+    font-size: 0.75rem;
+    /* xs */
+    color: var(--color-text-medium);
+    margin-top: 0.5rem;
+    /* mt-2 */
+}
+
+
+/* --- Sección de Bienvenida y Accesos Rápidos --- */
+
+.welcome-section {
+    margin-top: 2.5rem;
+    /* mt-10 */
+    background-color: #ffffff;
+    padding: 2rem;
+    /* p-8 */
+    border-radius: 0.75rem;
+    /* rounded-xl */
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+    /* shadow-xl */
+}
+
+.welcome-title {
+    font-size: 1.5rem;
+    /* 2xl */
+    font-weight: 700;
+    /* bold */
+    color: var(--color-primary-dark);
+    margin-bottom: 1rem;
+    /* mb-4 */
+}
+
+.welcome-text {
+    color: var(--color-text-dark);
+    margin-bottom: 1.25rem;
+    /* mb-5 */
+    line-height: 1.625;
+    /* leading-relaxed */
+}
+
+.welcome-links-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    /* gap-4 */
+}
+
+@media (min-width: 768px) {
+
+    /* md: */
+    .welcome-links-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* Tarjeta de Enlace Rápido */
+.link-card {
+    display: block;
+    padding: 1rem;
+    /* p-4 */
+    background-color: #f9fafb;
+    /* gray-50 */
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    /* rounded-lg */
+    transition: background-color 200ms ease;
+    text-decoration: none;
+    /* Asegurar que no tenga subrayado */
+}
+
+.link-card:hover {
+    /* Clases de hover específicas */
+    background-color: #ecfdf5;
+    /* Verde muy claro (ej. green-50) */
+}
+
+.link-title {
+    font-weight: 700;
+    /* bold */
+    font-size: 1.125rem;
+    /* lg */
+    color: var(--color-text-dark);
+}
+
+.link-subtitle {
+    font-size: 0.875rem;
+    /* sm */
+    color: var(--color-text-medium);
+    margin-top: 0.25rem;
+    /* mt-1 */
+}
+
+.info-footer {
+    margin-top: 1.5rem;
+    /* mt-6 */
+    font-size: 0.875rem;
+    /* sm */
+    color: var(--color-text-medium);
+    border-top: 1px solid var(--color-border);
+    padding-top: 1rem;
+    /* pt-4 */
+}

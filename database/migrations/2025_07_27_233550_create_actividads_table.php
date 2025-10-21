@@ -17,7 +17,7 @@ return new class extends Migration {
             $table->string('lugar', 100);
             $table->text('descripcion')->nullable();
             $table->char('codigo_actividad_id', 2);
-            $table->unsignedBigInteger('area_intervencion_id');
+            $table->string('area_intervencion_id', 20);
             $table->timestamps();
 
             $table->foreign('codigo_actividad_id')->references('codigo_actividad')->on('codigo_actividad')->onDelete('cascade');

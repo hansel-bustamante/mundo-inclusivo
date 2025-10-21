@@ -12,11 +12,14 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // \App\Models\User::factory(10)->create();
-
-        // \App\Models\User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
+        $this->call([
+            // Asegúrate de que este seeder exista en database/seeders/
+            // Este crea al usuario 'admin_global'
+            AdminUserSeeder::class, 
+            
+            // Puedes agregar aquí otros seeders que necesites para catálogos:
+            // InstitucionSeeder::class,
+            // AreaIntervencionSeeder::class,
+        ]);
     }
 }

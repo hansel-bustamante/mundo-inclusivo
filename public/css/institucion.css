@@ -1,0 +1,490 @@
+/* ======================================= */
+/* 0. VARIABLES Y BASE                     */
+/* ======================================= */
+:root {
+    --color-primary: #059669;
+    /* Green 600 (Éxito/Acción principal) */
+    --color-primary-dark: #047857;
+    /* Green 700 */
+    --color-primary-light: #d1fae5;
+    /* Green 100 para un fondo suave de encabezado */
+
+    --color-danger: #dc2626;
+    /* Red 600 (Eliminar/Error) */
+    --color-danger-dark: #b91c1c;
+    /* Red 700 */
+
+    --color-info: #2563eb;
+    /* Blue 600 (Editar/Información) */
+    --color-info-dark: #1e40af;
+    /* Blue 800 */
+
+    --color-bg-light: #f9fafb;
+    /* Gray 50 (Fondo más claro para las tarjetas) */
+    --color-bg-card: #ffffff;
+    --color-border: #e5e7eb;
+    /* Gray 200 */
+
+    --color-text-dark: #111827;
+    /* Gray 900 (Titles/Primary text) */
+    --color-text-medium: #6b7280;
+    /* Gray 500 (Section Title/Secondary text) */
+
+    --shadow-base: 0 4px 10px rgba(0, 0, 0, 0.08);
+    --transition-speed: 250ms;
+}
+
+/* ======================================= */
+/* 1. ESTRUCTURA Y ENCABEZADOS             */
+/* ======================================= */
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.content-card {
+    background-color: var(--color-bg-card);
+    padding: 2rem;
+    border-radius: 0.75rem;
+    box-shadow: var(--shadow-base);
+    transition: box-shadow var(--transition-speed);
+}
+
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    /* Espacio debajo del título y el botón */
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: 1.5rem;
+}
+
+.section-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--color-text-dark);
+}
+
+/* ======================================= */
+/* 2. BOTONES Y ACCIONES                   */
+/* ======================================= */
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    font-weight: 600;
+    padding: 0.625rem 1.25rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: all var(--transition-speed) ease;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.btn-primary {
+    background-color: var(--color-primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: var(--color-primary-dark);
+    box-shadow: 0 5px 15px rgba(5, 150, 105, 0.3);
+    transform: translateY(-1px);
+}
+
+.btn-icon {
+    width: 1.15rem;
+    height: 1.15rem;
+    margin-right: 0.5rem;
+}
+
+/* Estilo del botón secundario para "Volver" o "Cancelar" */
+.btn-secondary {
+    background-color: #e5e7eb;
+    /* Gray 200 */
+    color: var(--color-text-medium);
+    font-weight: 600;
+    box-shadow: none;
+}
+
+.btn-secondary:hover {
+    background-color: #d1d5db;
+    /* Gray 300 */
+    color: var(--color-text-dark);
+    transform: none;
+    box-shadow: none;
+}
+
+/* ======================================= */
+/* 3. TABLAS DE DATOS                      */
+/* ======================================= */
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    /* Removido el borde superior aquí, se añade en el thead para mejor diseño */
+}
+
+/* Nuevo estilo para la cabecera */
+.data-table thead {
+    /* Usamos un color más brillante para la cabecera */
+    background-color: var(--color-primary-light);
+    border-top: 2px solid var(--color-primary);
+    border-bottom: 2px solid var(--color-primary);
+}
+
+.data-table th {
+    padding: 0.8rem 1.5rem;
+    text-align: left;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--color-primary-dark);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    /* Removido el border-bottom, ya está en el thead */
+}
+
+/* Se renombró a tbody en el Blade, aunque aquí usa .table-body */
+.data-table tbody tr {
+    transition: background-color 200ms ease;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.data-table tbody tr:hover {
+    background-color: #f3f4f6;
+    /* Gray 100, más suave que var(--color-bg-light) */
+}
+
+.data-table td {
+    padding: 1rem 1.5rem;
+    font-size: 0.9375rem;
+    white-space: nowrap;
+    color: var(--color-text-dark);
+}
+
+.data-table td:first-child {
+    font-weight: 600;
+    color: var(--color-primary-dark);
+}
+
+/* Alineación para la columna de acciones */
+.actions-cell {
+    width: 1%;
+    min-width: 100px;
+}
+
+/* Columna de Acciones */
+.action-buttons {
+    display: flex;
+    /* Separación de los iconos */
+    gap: 0.75rem;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.action-link {
+    display: inline-flex;
+    /* Aumento del tamaño del icono para mejor interacción */
+    width: 1.5rem;
+    height: 1.5rem;
+    transition: color 200ms ease, transform 150ms ease;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+
+.action-link:hover {
+    transform: translateY(-2px) scale(1.05);
+}
+
+.link-edit {
+    color: var(--color-info);
+}
+
+.link-edit:hover {
+    color: var(--color-info-dark);
+}
+
+.link-delete {
+    color: var(--color-danger);
+}
+
+.link-delete:hover {
+    color: var(--color-danger-dark);
+}
+
+/* Mensaje de Sin Registros */
+.empty-state {
+    padding: 3rem;
+    text-align: center;
+    background-color: var(--color-bg-light);
+    border: 1px dashed var(--color-border);
+    border-radius: 0.5rem;
+    margin-top: 1rem;
+}
+
+.empty-text {
+    font-size: 1.125rem;
+    font-weight: 500;
+    color: var(--color-text-medium);
+    line-height: 1.6;
+}
+
+.empty-icon {
+    width: 3rem;
+    height: 3rem;
+    margin: 0 auto 0.75rem;
+    color: var(--color-border);
+    display: block;
+}
+
+/* ======================================= */
+/* 4. MODAL DE ELIMINACIÓN                 */
+/* ======================================= */
+
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(17, 24, 39, 0.75);
+    display: none;
+    /* Cambiado de flex a none para controlar con JS */
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 300ms ease;
+}
+
+.modal-backdrop.show {
+    opacity: 1;
+    pointer-events: auto;
+    display: flex;
+    /* Se muestra con flex al añadir 'show' */
+}
+
+.modal-content {
+    background-color: var(--color-bg-card);
+    border-radius: 0.75rem;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+    padding: 2rem;
+    width: 100%;
+    max-width: 26rem;
+    transform: translateY(-20px) scale(0.98);
+    opacity: 0;
+    transition: transform 300ms ease, opacity 300ms ease;
+}
+
+.modal-backdrop.show .modal-content {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+}
+
+.modal-title {
+    font-size: 1.375rem;
+    font-weight: 800;
+    color: var(--color-danger);
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+}
+
+.modal-icon {
+    width: 1.75rem;
+    height: 1.75rem;
+    margin-right: 0.5rem;
+}
+
+.modal-text {
+    color: var(--color-text-medium);
+    margin-bottom: 2rem;
+    line-height: 1.6;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+}
+
+.btn-cancel {
+    background-color: #e5e7eb;
+    color: var(--color-text-medium);
+    font-weight: 600;
+    padding: 0.625rem 1.25rem;
+    border-radius: 0.5rem;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-cancel:hover {
+    background-color: #d1d5db;
+    color: var(--color-text-dark);
+}
+
+.btn-confirm {
+    background-color: var(--color-danger);
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 2px 5px rgba(220, 38, 38, 0.2);
+    padding: 0.625rem 1.25rem;
+    border-radius: 0.5rem;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-confirm:hover {
+    background-color: var(--color-danger-dark);
+    box-shadow: 0 5px 10px rgba(220, 38, 38, 0.3);
+    transform: translateY(-1px);
+}
+
+/* ======================================= */
+/* 5. ESTILOS DE MENSAJES DE ESTADO        */
+/* ======================================= */
+
+/* Mensaje de sesión (Éxito) */
+.flash-message {
+    padding: 1rem;
+    margin-bottom: 2rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    border: 1px solid transparent;
+}
+
+/* Usamos los colores primarios para el éxito */
+.flash-success {
+    background-color: #ecfdf5;
+    /* Green 50 */
+    border-color: var(--color-primary);
+    color: var(--color-primary-dark);
+}
+
+.flash-success .btn-icon {
+    color: var(--color-primary);
+}
+
+/* Alerta de errores de validación */
+.error-alert {
+    padding: 1rem;
+    margin-bottom: 2rem;
+    border-radius: 0.5rem;
+    background-color: #fef2f2;
+    /* Red 50 */
+    border: 1px solid var(--color-danger);
+    color: var(--color-danger-dark);
+}
+
+.error-header {
+    display: flex;
+    align-items: center;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.error-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-right: 0.5rem;
+    color: var(--color-danger);
+}
+
+.error-list {
+    list-style: disc;
+    margin-left: 2rem;
+    font-size: 0.9375rem;
+}
+
+
+/* ======================================= */
+/* 6. ESTILOS DE FORMULARIO (CREATE/EDIT)  */
+/* ======================================= */
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .form-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.form-span-2 {
+    grid-column: span 1 / span 1;
+}
+
+@media (min-width: 768px) {
+    .form-span-2 {
+        grid-column: span 2 / span 2;
+    }
+}
+
+.form-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--color-text-dark);
+    margin-bottom: 0.4rem;
+}
+
+.form-input {
+    width: 100%;
+    padding: 0.625rem 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    color: var(--color-text-dark);
+    transition: all var(--transition-speed) ease-in-out;
+    appearance: none;
+    background-color: white;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 1px var(--color-primary), 0 0 0 4px rgba(5, 150, 105, 0.2);
+}
+
+/* Estado de Error para Input */
+.form-input.is-invalid {
+    border-color: var(--color-danger);
+}
+
+.form-input.is-invalid:focus {
+    border-color: var(--color-danger);
+    box-shadow: 0 0 0 1px var(--color-danger), 0 0 0 4px rgba(220, 38, 38, 0.2);
+}
+
+.input-error-message {
+    font-size: 0.8125rem;
+    color: var(--color-danger);
+    margin-top: 0.3rem;
+}
+
+/* Acciones del Formulario (Botones) */
+.form-actions {
+    margin-top: 2rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}

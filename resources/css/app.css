@@ -1,0 +1,80 @@
+/*
+ * Las rutas a continuación asumen que los archivos de la fuente (woff2 y ttf) 
+ * han sido colocados en una carpeta accesible por el navegador, 
+ * por ejemplo, 'public/fonts/'
+ */
+
+@font-face {
+    font-family: 'gg sans';
+    font-weight: 400;
+    /* Regular */
+    font-style: normal;
+    src: local('gg sans Regular'),
+        url('/fonts/gg-sans-regular.woff2') format('woff2'),
+        url('/fonts/gg-sans-regular.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'gg sans';
+    font-weight: 500;
+    /* Medium */
+    font-style: normal;
+    src: local('gg sans Medium'),
+        url('/fonts/gg-sans-medium.woff2') format('woff2'),
+        url('/fonts/gg-sans-medium.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'gg sans';
+    font-weight: 600;
+    /* Semibold */
+    font-style: normal;
+    src: local('gg sans Semibold'),
+        url('/fonts/gg-sans-semibold.woff2') format('woff2'),
+        url('/fonts/gg-sans-semibold.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'gg sans';
+    font-weight: 700;
+    /* Bold */
+    font-style: normal;
+    src: local('gg sans Bold'),
+        url('/fonts/gg-sans-bold.woff2') format('woff2'),
+        url('/fonts/gg-sans-bold.ttf') format('truetype');
+}
+
+body {
+    /* Aplicar 'gg sans' como fuente principal. 'Inter' es el fallback si no se carga. */
+    font-family: 'gg sans', 'Inter', sans-serif;
+    background-color: #f4f6f8;
+    /* Fondo claro de la aplicación */
+}
+
+/* Estilos de transición y colores */
+.sidebar {
+    transition: transform 0.3s ease-in-out;
+}
+
+.main-content {
+    transition: margin-left 0.3s ease-in-out;
+}
+
+/* Color principal de la aplicación: Esmeralda */
+.primary-color {
+    background-color: #10B981;
+    /* Esmeralda 500 */
+}
+
+.primary-text {
+    color: #047857;
+    /* Esmeralda 700 */
+}
+
+/* Estilo para iconos/botones del menú lateral activo */
+.bg-gray-900 a {
+    color: #10B981 !important;
+    /* Resaltar el texto de la opción activa */
+    font-weight: 600;
+    /* Semibold */
+}
