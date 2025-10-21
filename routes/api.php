@@ -30,21 +30,13 @@ use App\Http\Controllers\PersonaController;
 */
 
 
-
-
-
+// Rutas API Resource estándar (usando una sola clave primaria)
 Route::apiResource('registra', RegistraController::class);
 Route::apiResource('asistencia-sesion', AsistenciaSesionController::class);
 Route::apiResource('sesiones', SesionController::class);
 Route::apiResource('evaluaciones', EvaluacionController::class);
 Route::apiResource('seguimiento', SeguimientoController::class);
 Route::apiResource('ficha_registro', FichaRegistroController::class);
-Route::get('participa_en', [ParticipaEnController::class, 'index']);
-Route::post('participa_en', [ParticipaEnController::class, 'store']);
-Route::get('participa_en/{id_persona}/{id_actividad}', [ParticipaEnController::class, 'show']);
-Route::put('participa_en/{id_persona}/{id_actividad}', [ParticipaEnController::class, 'update']);
-Route::delete('participa_en/{id_persona}/{id_actividad}', [ParticipaEnController::class, 'destroy']);
-Route::apiResource('participa_en', ParticipaEnController::class);
 Route::apiResource('actividades', ActividadController::class);
 Route::apiResource('participantes', ParticipanteController::class);
 Route::apiResource('beneficiarios', BeneficiarioController::class);
@@ -53,6 +45,18 @@ Route::apiResource('codigo_actividad', CodigoActividadController::class);
 Route::apiResource('areas_intervencion', AreaIntervencionController::class);
 Route::apiResource('personas', PersonaController::class);
 Route::apiResource('instituciones', InstitucionController::class);
+
+
+// Rutas personalizadas para la tabla pivote PARTICIPA_EN (clave compuesta)
+// Se mantienen las rutas explícitas con dos parámetros para Show, Update y Destroy
+// para evitar el conflicto con Route::apiResource.
+Route::get('participa_en', [ParticipaEnController::class, 'index']);
+Route::post('participa_en', [ParticipaEnController::class, 'store']);
+Route::get('participa_en/{id_persona}/{id_actividad}', [ParticipaEnController::class, 'show']);
+Route::put('participa_en/{id_persona}/{id_actividad}', [ParticipaEnController::class, 'update']);
+Route::delete('participa_en/{id_persona}/{id_actividad}', [ParticipaEnController::class, 'destroy']);
+
+
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });

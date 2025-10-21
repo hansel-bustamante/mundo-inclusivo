@@ -3,59 +3,100 @@
 namespace App\Http\Controllers;
 
 use App\Models\Sesion;
+use App\Models\Actividad; // Necesario para obtener la lista de FK
 use Illuminate\Http\Request;
+use App\Models\AsistenciaSesion;
 
 class SesionController extends Controller
 {
+    /**
+     * Muestra la lista de sesiones.
+     */
     public function index()
     {
-        return Sesion::with('actividad')->get();
+        $sesiones = Sesion::with('actividad')->get();
+        return view('sesion.index', compact('sesiones'));
     }
 
+    /**
+     * Muestra el formulario para crear una nueva sesión.
+     */
+    public function create()
+    {
+        // Se necesitan todas las actividades para el campo select de la clave foránea
+        $actividades = Actividad::all();
+        return view('sesion.create', compact('actividades'));
+    }
+
+    /**
+     * Almacena una nueva sesión.
+     */
     public function store(Request $request)
     {
         $request->validate([
-            'nro_sesion' => 'required|integer',
+            'nro_sesion' => 'required|integer|min:1',
             'fecha' => 'required|date',
             'hora_inicio' => 'required|date_format:H:i',
             'hora_fin' => 'required|date_format:H:i|after:hora_inicio',
-            'tema' => 'nullable|string|max:150',
+            'tema' => 'required|string|max:150',
+            // id_actividad es un INT (BIGINT unsigned)
             'id_actividad' => 'required|exists:actividad,id_actividad',
         ]);
 
-        $sesion = Sesion::create($request->all());
+        Sesion::create($request->all());
 
-        return response()->json($sesion, 201);
+        return redirect()->route('sesion.index')->with('success', 'Sesión creada exitosamente.');
     }
 
-    public function show($id)
+    /**
+     * Muestra el formulario para editar una sesión.
+     */
+    public function edit(Sesion $sesion)
     {
-        return Sesion::with('actividad')->findOrFail($id);
+        $actividades = Actividad::all();
+        return view('sesion.edit', compact('sesion', 'actividades'));
     }
 
-    public function update(Request $request, $id)
+    /**
+     * Actualiza una sesión específica.
+     */
+    public function update(Request $request, Sesion $sesion)
     {
-        $sesion = Sesion::findOrFail($id);
-
         $request->validate([
-            'nro_sesion' => 'sometimes|required|integer',
+            'nro_sesion' => 'sometimes|required|integer|min:1',
             'fecha' => 'sometimes|required|date',
             'hora_inicio' => 'sometimes|required|date_format:H:i',
             'hora_fin' => 'sometimes|required|date_format:H:i|after:hora_inicio',
-            'tema' => 'nullable|string|max:150',
+            'tema' => 'sometimes|required|string|max:150',
             'id_actividad' => 'sometimes|required|exists:actividad,id_actividad',
         ]);
 
         $sesion->update($request->all());
 
-        return response()->json($sesion);
+        return redirect()->route('sesion.index')->with('success', 'Sesión actualizada exitosamente.');
     }
 
-    public function destroy($id)
+    /**
+     * Elimina una sesión específica.
+     */
+    public function destroy(Sesion $sesion)
     {
-        $sesion = Sesion::findOrFail($id);
         $sesion->delete();
-
-        return response()->json(null, 204);
+        return redirect()->route('sesion.index')->with('success', 'Sesión eliminada.');
     }
+
+    public function editAsistencia(Sesion $sesion)
+{
+    // Cargar la actividad relacionada y sus participantes.
+    $participantesActividad = $sesion->actividad->participantes;
+
+    // Obtener todas las asistencias registradas para esta sesión específica
+    $asistenciasRegistradas = AsistenciaSesion::where('id_sesion', $sesion->id_sesion)->get();
+
+    return view('sesion.asistencia', [ // ¡Ruta corregida aquí!
+        'sesion' => $sesion->load('actividad'),
+        'participantesActividad' => $participantesActividad,
+        'asistenciasRegistradas' => $asistenciasRegistradas,
+    ]);
+}
 }

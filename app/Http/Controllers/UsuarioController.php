@@ -1,82 +1,104 @@
 <?php
 
-namespace App\Http\Controllers\Auth;
+namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
+use App\Models\Usuario;
+use App\Models\Persona;
+use App\Models\AreaIntervencion;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
-class LoginController extends Controller
+class UsuarioController extends Controller
 {
     /**
-     * Muestra el formulario de inicio de sesión.
+     * Muestra una lista de todos los usuarios con su información de persona y área.
      */
-    public function showLoginForm()
+    public function index()
     {
-        // Si el usuario ya está autenticado, lo redirigimos a su dashboard
-        if (Auth::check()) {
-            return $this->redirectToDashboard();
-        }
-        return view('auth.login'); // Asume que tienes una vista en resources/views/auth/login.blade.php
+        $usuarios = Usuario::with(['persona', 'areaIntervencion'])->get();
+        return view('usuario.index', compact('usuarios'));
     }
 
     /**
-     * Maneja el intento de inicio de sesión.
+     * Muestra el formulario para crear un nuevo usuario.
+     * Necesitamos pasar las Áreas de Intervención para el campo SELECT.
      */
-    public function login(Request $request)
+    public function create()
     {
-        // 1. Validar los datos de entrada
-        $credentials = $request->validate([
-            // Usamos 'nombre_usuario' como campo de login
-            'nombre_usuario' => 'required|string', 
-            'contrasena' => 'required|string',
+        $areas = AreaIntervencion::orderBy('nombre_area')->get();
+        return view('usuario.create', compact('areas'));
+    }
+
+    /**
+     * Almacena un nuevo usuario.
+     */
+    public function store(Request $request)
+    {
+        $request->validate([
+            'id_persona' => 'required|integer|exists:persona,id_persona|unique:usuario,id_persona',
+            'nombre_usuario' => 'required|string|max:50|unique:usuario,nombre_usuario',
+            'contrasena' => 'required|string|min:6',
+            'rol' => 'required|in:admin,coordinador,registrador',
+            'correo' => 'required|email|max:100|unique:usuario,correo',
+            // area_intervencion_id debe existir en la tabla area_intervencion en la columna codigo_area
+            'area_intervencion_id' => 'required|exists:area_intervencion,codigo_area',
         ]);
 
-        // 2. Intentar autenticación
-        // El guard de Laravel buscará en el campo 'nombre_usuario' y verificará 'contrasena'
-        if (Auth::attempt(['nombre_usuario' => $credentials['nombre_usuario'], 'password' => $credentials['contrasena']])) {
-            
-            $request->session()->regenerate();
+        Usuario::create($request->all());
 
-            // 3. Autenticación exitosa: Redirigir según el rol
-            return $this->redirectToDashboard();
-        }
-
-        // 4. Autenticación fallida
-        return back()->withErrors([
-            'nombre_usuario' => 'Las credenciales proporcionadas no coinciden con nuestros registros.',
-        ])->onlyInput('nombre_usuario');
+        return redirect()->route('usuario.index')->with('success', 'Usuario registrado exitosamente.');
     }
 
     /**
-     * Cierra la sesión del usuario.
+     * Muestra el formulario para editar un usuario.
      */
-    public function logout(Request $request)
+    public function edit($id)
     {
-        Auth::logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return redirect('/');
+        $usuario = Usuario::with(['persona', 'areaIntervencion'])->findOrFail($id);
+        $areas = AreaIntervencion::orderBy('nombre_area')->get();
+        
+        return view('usuario.edit', compact('usuario', 'areas'));
     }
 
     /**
-     * Determina la redirección del usuario basado en su rol.
+     * Actualiza la información de un usuario.
      */
-    protected function redirectToDashboard()
+    public function update(Request $request, $id)
     {
-        $user = Auth::user();
-
-        switch ($user->rol) {
-            case 'admin':
-                return redirect()->route('admin.dashboard'); // Ruta protegida principal
-            case 'coordinador':
-                return redirect()->route('coordinador.dashboard');
-            case 'registrador':
-                return redirect()->route('registrador.dashboard');
-            default:
-                // Si el rol no está definido, simplemente redirigir a casa o logout
-                return redirect('/');
+        $usuario = Usuario::findOrFail($id);
+        
+        $rules = [
+            'nombre_usuario' => 'sometimes|required|string|max:50|unique:usuario,nombre_usuario,' . $usuario->id_persona . ',id_persona',
+            // Contraseña opcional: Solo se requiere si se proporciona un valor
+            'contrasena' => 'nullable|string|min:6', 
+            'rol' => 'sometimes|required|in:admin,coordinador,registrador',
+            'correo' => 'sometimes|required|email|max:100|unique:usuario,correo,' . $usuario->id_persona . ',id_persona',
+            'area_intervencion_id' => 'sometimes|required|exists:area_intervencion,codigo_area',
+        ];
+        
+        $validatedData = $request->validate($rules);
+        
+        // Si la contraseña está vacía, la quitamos para que el Mutator no la hashee como vacía
+        if (empty($validatedData['contrasena'])) {
+            unset($validatedData['contrasena']);
         }
+
+        $usuario->update($validatedData);
+
+        return redirect()->route('usuario.index')->with('success', 'Usuario actualizado exitosamente.');
+    }
+
+    /**
+     * Elimina un usuario (solo el registro de USUARIO, NO la Persona).
+     */
+    public function destroy($id)
+    {
+        $usuario = Usuario::findOrFail($id);
+        $usuario->delete();
+
+        return redirect()->route('usuario.index')->with('success', 'Usuario eliminado exitosamente.');
     }
 }
+
+    
+
+

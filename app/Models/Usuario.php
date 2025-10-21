@@ -3,7 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable; 
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use App\Models\Persona; // Asegurar que Persona se use para la relación
+use App\Models\AreaIntervencion; // Asegurar que AreaIntervencion se use para la relación
 
 class Usuario extends Authenticatable
 {
@@ -47,6 +49,8 @@ class Usuario extends Authenticatable
     public function setContrasenaAttribute($value)
     {
         // Solo hashea si el valor no parece ser ya un hash (para evitar doble hasheo)
+        // NOTA: Para CRUDS de gestión, a menudo se usa un 'setter' que hashea siempre, 
+        // pero este enfoque previene el doble hasheo si se pasa un hash existente.
         if (!\Illuminate\Support\Str::startsWith($value, '$2y$')) {
             $this->attributes['contrasena'] = bcrypt($value);
         } else {
@@ -67,6 +71,7 @@ class Usuario extends Authenticatable
     }
 
     // Relación con AREA_INTERVENCION
+    // NOTA: Asumo que AreaIntervencion tiene una clave primaria 'codigo_area' (VARCHAR o INT)
     public function areaIntervencion()
     {
         return $this->belongsTo(AreaIntervencion::class, 'area_intervencion_id', 'codigo_area');

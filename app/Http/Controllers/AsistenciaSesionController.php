@@ -7,59 +7,55 @@ use Illuminate\Http\Request;
 
 class AsistenciaSesionController extends Controller
 {
-    public function index()
-    {
-        return AsistenciaSesion::with(['sesion', 'persona'])->get();
-    }
-
+    // Método para registrar/actualizar la asistencia
     public function store(Request $request)
     {
         $request->validate([
-            'id_sesion' => 'required|exists:sesion,id_sesion',
-            'id_persona' => 'required|exists:persona,id_persona',
+            'id_sesion' => 'required|exists:SESION,id_sesion',
+            'id_persona' => 'required|exists:PERSONA,id_persona',
             'firma' => 'required|boolean',
             'observaciones' => 'nullable|string',
         ]);
 
-        $asistencia = AsistenciaSesion::create($request->all());
+        try {
+            // Usa updateOrCreate para registrar la asistencia o actualizarla si ya existe
+            $asistencia = AsistenciaSesion::updateOrCreate(
+                [
+                    'id_sesion' => $request->id_sesion,
+                    'id_persona' => $request->id_persona,
+                ],
+                $request->only(['firma', 'observaciones'])
+            );
 
-        return response()->json($asistencia, 201);
+            return response()->json($asistencia, 201);
+        } catch (\Exception $e) {
+            \Log::error('Error al guardar asistencia a sesión: ' . $e->getMessage());
+            return response()->json(['message' => 'Error de servidor al guardar la asistencia.'], 500);
+        }
     }
 
-    public function show($id_sesion)
+    // Método para eliminar la asistencia (clave compuesta)
+    public function destroy($id_sesion, $id_persona)
     {
-        return AsistenciaSesion::where('id_sesion', $id_sesion)->with(['sesion', 'persona'])->get();
-    }
+        try {
+            // 1. Buscar el registro pivote
+            $asistencia = AsistenciaSesion::where('id_sesion', $id_sesion)
+                ->where('id_persona', $id_persona)
+                ->first();
 
-    public function update(Request $request, $id_sesion)
-    {
-        $request->validate([
-            'id_persona' => 'required|exists:persona,id_persona',
-            'firma' => 'sometimes|boolean',
-            'observaciones' => 'nullable|string',
-        ]);
+            if (!$asistencia) {
+                return response()->json(['message' => 'Asistencia no encontrada.'], 404);
+            }
 
-        $asistencia = AsistenciaSesion::where('id_sesion', $id_sesion)
-            ->where('id_persona', $request->id_persona)
-            ->firstOrFail();
+            // 2. Eliminar el registro (funciona gracias al método delete() en el modelo)
+            $asistencia->delete();
 
-        $asistencia->update($request->only('firma', 'observaciones'));
+            // 3. Respuesta exitosa sin contenido
+            return response()->json(null, 204);
 
-        return response()->json($asistencia);
-    }
-
-    public function destroy(Request $request, $id_sesion)
-    {
-        $request->validate([
-            'id_persona' => 'required|exists:persona,id_persona',
-        ]);
-
-        $asistencia = AsistenciaSesion::where('id_sesion', $id_sesion)
-            ->where('id_persona', $request->id_persona)
-            ->firstOrFail();
-
-        $asistencia->delete();
-
-        return response()->json(null, 204);
+        } catch (\Exception $e) {
+            \Log::error('Error al eliminar asistencia a sesión: ' . $e->getMessage());
+            return response()->json(['message' => 'Error de servidor al eliminar la asistencia.'], 500);
+        }
     }
 }

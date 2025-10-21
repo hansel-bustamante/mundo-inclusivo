@@ -30,4 +30,13 @@ class Actividad extends Model
     {
         return $this->belongsTo(AreaIntervencion::class, 'area_intervencion_id', 'codigo_area');
     }
+
+
+    public function participantes()
+    {
+        return $this->belongsToMany(Persona::class, 'PARTICIPA_EN', 'id_actividad', 'id_persona')
+                    ->using(ParticipaEn::class) // Usamos el modelo pivote
+                    ->withPivot(['tiene_discapacidad', 'es_familiar', 'firma']);
+    }
+
 }

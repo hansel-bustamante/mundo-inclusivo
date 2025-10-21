@@ -6,9 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Participante extends Model
 {
-    protected $table = 'participante';
+    // Usamos el nombre en MAYÚSCULAS para coincidir con tu esquema SQL
+    protected $table = 'PARTICIPANTE'; 
+    
     protected $primaryKey = 'id_persona';
-    public $incrementing = false;
+    public $incrementing = false; 
     protected $keyType = 'int';
 
     protected $fillable = [
@@ -16,16 +18,23 @@ class Participante extends Model
         'id_institucion',
     ];
 
-    public $timestamps = true;
+    // ************************************************
+    // ¡CRÍTICO! Deshabilitar timestamps, ya que no existen en la tabla.
+    public $timestamps = false; 
+    // ************************************************
 
-    // Relaciones (opcional)
-    public function persona()
-    {
-        return $this->belongsTo(Persona::class, 'id_persona', 'id_persona');
-    }
-
+    protected $casts = [
+        'id_persona' => 'integer',
+        'id_institucion' => 'integer',
+    ];
+        // Relaciones
     public function institucion()
     {
         return $this->belongsTo(Institucion::class, 'id_institucion', 'id_institucion');
+    }
+
+    public function persona()
+    {
+        return $this->belongsTo(Persona::class, 'id_persona', 'id_persona');
     }
 }
