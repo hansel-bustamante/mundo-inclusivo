@@ -3,55 +3,81 @@
 namespace App\Http\Controllers;
 
 use App\Models\Seguimiento;
+use App\Models\Actividad;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class SeguimientoController extends Controller
 {
+    /**
+     * Muestra la lista de todos los Seguimientos.
+     */
     public function index()
     {
-        return Seguimiento::with('actividad')->get();
+        $seguimientos = Seguimiento::with('actividad')->orderBy('fecha', 'desc')->get();
+        return view('seguimiento.index', compact('seguimientos'));
     }
 
+    /**
+     * Muestra el formulario para crear un nuevo Seguimiento.
+     */
+    public function create()
+    {
+        // Se listan las actividades para asociar el seguimiento
+        $actividades = Actividad::orderBy('fecha', 'desc')->get();
+        return view('seguimiento.create', compact('actividades'));
+    }
+
+    /**
+     * Almacena un nuevo Seguimiento en la base de datos.
+     */
     public function store(Request $request)
     {
         $request->validate([
             'fecha' => 'required|date',
-            'tipo' => 'required|string|max:50',
-            'observaciones' => 'nullable|string',
-            'actividad_id' => 'required|exists:actividad,id_actividad',
+            // Valida que el campo 'tipo' sea uno de los valores definidos
+            'tipo' => ['required', 'string', 'max:50', Rule::in(['Visita Domiciliaria', 'Llamada Telefónica', 'Reunión Presencial', 'Otro'])],
+            'observaciones' => 'required|string|max:1000',
+            'actividad_id' => 'required|exists:ACTIVIDAD,id_actividad',
         ]);
 
-        $seguimiento = Seguimiento::create($request->all());
+        Seguimiento::create($request->all());
 
-        return response()->json($seguimiento, 201);
+        return redirect()->route('seguimiento.index')->with('success', 'Seguimiento registrado exitosamente.');
     }
 
-    public function show($id)
+    /**
+     * Muestra el formulario para editar un Seguimiento existente.
+     */
+    public function edit(Seguimiento $seguimiento)
     {
-        return Seguimiento::with('actividad')->findOrFail($id);
+        $actividades = Actividad::orderBy('fecha', 'desc')->get();
+        return view('seguimiento.edit', compact('seguimiento', 'actividades'));
     }
 
-    public function update(Request $request, $id)
+    /**
+     * Actualiza un Seguimiento en la base de datos.
+     */
+    public function update(Request $request, Seguimiento $seguimiento)
     {
-        $seguimiento = Seguimiento::findOrFail($id);
-
         $request->validate([
             'fecha' => 'sometimes|required|date',
-            'tipo' => 'sometimes|required|string|max:50',
-            'observaciones' => 'nullable|string',
-            'actividad_id' => 'sometimes|required|exists:actividad,id_actividad',
+            'tipo' => ['sometimes', 'required', 'string', 'max:50', Rule::in(['Visita Domiciliaria', 'Llamada Telefónica', 'Reunión Presencial', 'Otro'])],
+            'observaciones' => 'sometimes|required|string|max:1000',
+            'actividad_id' => 'sometimes|required|exists:ACTIVIDAD,id_actividad',
         ]);
 
         $seguimiento->update($request->all());
 
-        return response()->json($seguimiento);
+        return redirect()->route('seguimiento.index')->with('success', 'Seguimiento actualizado exitosamente.');
     }
 
-    public function destroy($id)
+    /**
+     * Elimina un Seguimiento de la base de datos.
+     */
+    public function destroy(Seguimiento $seguimiento)
     {
-        $seguimiento = Seguimiento::findOrFail($id);
         $seguimiento->delete();
-
-        return response()->json(null, 204);
+        return redirect()->route('seguimiento.index')->with('success', 'Seguimiento eliminado.');
     }
 }

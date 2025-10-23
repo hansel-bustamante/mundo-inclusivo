@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+
 // Controladores principales
 use App\Http\Controllers\PersonaController;
 use App\Http\Controllers\BeneficiarioController;
@@ -9,12 +10,15 @@ use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\ActividadController;
 use App\Http\Controllers\SesionController;
 use App\Http\Controllers\ParticipaEnController; 
+use App\Http\Controllers\EvaluacionController;
+use App\Http\Controllers\SeguimientoController;
+use App\Http\Controllers\FichaRegistroController; 
 // Controladores de catálogos
 use App\Http\Controllers\InstitucionController;
 use App\Http\Controllers\AreaIntervencionController;
 use App\Http\Controllers\CodigoActividadController;
 // Controladores de API
-use App\Http\Controllers\AsistenciaSesionController; // <<< ¡NUEVO USE!
+use App\Http\Controllers\AsistenciaSesionController; 
 // Controladores de autenticación
 use App\Http\Controllers\Auth\LoginController;
 
@@ -28,14 +32,12 @@ use App\Http\Controllers\Auth\LoginController;
 */
 
 // --- RUTAS DE AUTENTICACIÓN ---
-// Manejo estándar de login y logout.
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 
 // --- RUTA RAÍZ (Index / Home) ---
-// Redirige al dashboard del administrador si el usuario está autenticado.
 Route::get('/', function () {
     if (Auth::check()) {
         return redirect()->route('admin.dashboard');
@@ -69,25 +71,35 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::resource('beneficiario', BeneficiarioController::class)->parameters([
         'beneficiario' => 'id_persona' 
     ]);
-    // 6. USUARIOS (Usando id_persona como clave)
+    
+    // 6. FICHA DE REGISTRO <-- CORRECCIÓN DE NOMBRE AQUÍ
+    Route::resource('ficha-registro', FichaRegistroController::class)->names('ficha_registro');
+
+    // 7. USUARIOS (Usando id_persona como clave)
     Route::resource('usuario', UsuarioController::class)->parameters([
         'usuario' => 'id_persona' 
     ]);
-    // 7. ACTIVIDADES
+    // 8. ACTIVIDADES
     Route::resource('actividad', ActividadController::class);
-    
+
     // RUTA EXTRA: Formulario de gestión de participantes de una actividad (Web/Blade)
     Route::get('actividad/{actividad}/participantes', [ActividadController::class, 'editParticipantes'])
         ->name('actividad.participantes.edit');
 
-    // 8. SESIONES
+    // 9. SESIONES
     Route::resource('sesion', SesionController::class);
     
     // RUTA AÑADIDA: Enlace para el formulario de gestión de asistencia a sesión (Web)
     Route::get('sesion/{sesion}/asistencia', [SesionController::class, 'editAsistencia'])
         ->name('sesion.asistencia.edit');
-    
-    // 9. PARTICIPA_EN (Relación Persona - Actividad) - Rutas de API para la tabla pivote
+        
+    // 10. EVALUACIONES
+    Route::resource('evaluacion', EvaluacionController::class);
+
+    // 11. SEGUIMIENTO 
+    Route::resource('seguimiento', SeguimientoController::class)->names('seguimiento');
+
+    // 12. PARTICIPA_EN (Relación Persona - Actividad) - Rutas de API para la tabla pivote
     Route::prefix('participaen')->group(function () {
         Route::get('/', [ParticipaEnController::class, 'index'])->name('participaen.index');
         Route::post('/', [ParticipaEnController::class, 'store'])->name('participaen.store');
@@ -99,16 +111,10 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
 
 
 // --- RUTAS DE API PARA GESTIÓN DE ASISTENCIA ---
-// Este grupo es CRÍTICO para resolver el error 404 de la llamada DELETE.
-// El prefijo 'api/asistencia-sesion' coincide con tu llamada AJAX.
 Route::middleware(['auth'])->prefix('api/asistencia-sesion')->group(function () {
-    
-    // Endpoint para guardar/actualizar (POST /api/asistencia-sesion)
     Route::post('/', [AsistenciaSesionController::class, 'store'])->name('api.asistencia.store');
-    
-    // Endpoint para eliminar (DELETE /api/asistencia-sesion/{id_sesion}/{id_persona})
     Route::delete('{id_sesion}/{id_persona}', [AsistenciaSesionController::class, 'destroy'])
-         ->name('api.asistencia.destroy');
+        ->name('api.asistencia.destroy');
 });
 
 

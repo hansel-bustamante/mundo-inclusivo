@@ -20,7 +20,7 @@ class Actividad extends Model
 
     public $timestamps = true;
 
-    // Relaciones
+    // Relaciones de Catálogos
     public function codigoActividad()
     {
         return $this->belongsTo(CodigoActividad::class, 'codigo_actividad_id', 'codigo_actividad');
@@ -31,7 +31,7 @@ class Actividad extends Model
         return $this->belongsTo(AreaIntervencion::class, 'area_intervencion_id', 'codigo_area');
     }
 
-
+    // Relación Muchos a Muchos (Participantes)
     public function participantes()
     {
         return $this->belongsToMany(Persona::class, 'PARTICIPA_EN', 'id_actividad', 'id_persona')
@@ -39,4 +39,12 @@ class Actividad extends Model
                     ->withPivot(['tiene_discapacidad', 'es_familiar', 'firma']);
     }
 
+    // ******************************************************
+    // ¡CORRECCIÓN! RELACIÓN UNO A UNO CON EVALUACION (AÑADIDA)
+    // ******************************************************
+    public function evaluacion()
+    {
+        // Una Actividad puede tener como máximo una Evaluación
+        return $this->hasOne(Evaluacion::class, 'actividad_id', 'id_actividad');
+    }
 }

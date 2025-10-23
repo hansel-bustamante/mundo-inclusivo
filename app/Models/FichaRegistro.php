@@ -6,8 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class FichaRegistro extends Model
 {
-    protected $table = 'ficha_registro';
+    protected $table = 'FICHA_REGISTRO';
     protected $primaryKey = 'id_ficha';
+    public $timestamps = false; 
 
     protected $fillable = [
         'fecha_registro',
@@ -18,16 +19,22 @@ class FichaRegistro extends Model
         'area_intervencion_id',
     ];
 
-    public $timestamps = true;
+    protected $casts = [
+        // Laravel convierte los booleanos de la DB (0/1) a true/false
+        'retraso_en_desarrollo' => 'boolean',
+        'incluido_en_educacion_2025' => 'boolean',
+    ];
 
     // Relaciones
     public function beneficiario()
     {
-        return $this->belongsTo(Beneficiario::class, 'beneficiario_id', 'id_persona');
+        // Se relaciona con Participante (tabla PARTICIPANTE), usando id_persona
+        return $this->belongsTo(Participante::class, 'beneficiario_id', 'id_persona');
     }
 
     public function usuario()
     {
+        // Se relaciona con Usuario (tabla USUARIO), usando id_persona
         return $this->belongsTo(Usuario::class, 'usuario_id', 'id_persona');
     }
 

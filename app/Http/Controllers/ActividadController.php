@@ -13,10 +13,10 @@ class ActividadController extends Controller
 {
     public function index()
     {
-        // Añadimos withCount para obtener el número de participantes de forma eficiente
-        $actividades = Actividad::with(['codigoActividad', 'areaIntervencion'])
-                            ->withCount('participantes') 
-                            ->get();
+        // En ActividadController.php, método index()
+        $actividades = Actividad::with(['areaIntervencion', 'codigoActividad', 'evaluacion'])
+                                ->withCount('participantes') // CRÍTICO: Para usar $actividad->participantes_count
+                                ->get();
 
         return view('actividad.index', compact('actividades'));
     }
@@ -97,15 +97,15 @@ class ActividadController extends Controller
     /**
      * Muestra el formulario para gestionar los participantes de una actividad (UI Layer).
      */
-public function editParticipantes(Actividad $actividad)
-{
-    // ...
-    $participantesActuales = $actividad->participantes()->get();
-    $personasDisponibles = Persona::whereDoesntHave('usuario')->orderBy('apellido_paterno')->get();
-    
-    // ** CRÍTICO **: Obtener instituciones
-    $instituciones = Institucion::all(); 
+    public function editParticipantes(Actividad $actividad)
+    {
+        // ...
+        $participantesActuales = $actividad->participantes()->get();
+        $personasDisponibles = Persona::whereDoesntHave('usuario')->orderBy('apellido_paterno')->get();
+        
+        // ** CRÍTICO **: Obtener instituciones
+        $instituciones = Institucion::all(); 
 
-    return view('actividad.participantes', compact('actividad', 'participantesActuales', 'personasDisponibles', 'instituciones'));
-}
+        return view('actividad.participantes', compact('actividad', 'participantesActuales', 'personasDisponibles', 'instituciones'));
+    }
 }
