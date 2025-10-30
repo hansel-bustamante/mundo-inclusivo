@@ -46,10 +46,11 @@
     --shadow-hover: 0 8px 20px rgba(0, 0, 0, 0.15);
     /* Sombra más profunda al pasar el ratón */
     --transition-speed: 250ms;
+    --border-radius: 0.5rem;
+    /* Variable añadida para consistencia en radios */
 }
 
 body {
-    /* Se añade font-family aquí por si no está definido globalmente */
     font-family: 'Roboto', sans-serif;
 }
 
@@ -62,17 +63,22 @@ body {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 2rem;
+    flex-wrap: wrap;
+    /* Añadido para mejor manejo en pantallas muy pequeñas */
+    gap: 1rem;
 }
 
 .content-card {
     background-color: var(--color-bg-card);
     padding: 2rem;
-    border-radius: 0.75rem;
+    border-radius: var(--border-radius);
+    /* Usando variable */
     box-shadow: var(--shadow-base);
-    /* Se elimina la transición de sombra en el card para evitar distracciones excesivas, 
-       pero se mantiene la transición en los botones. */
     border: 1px solid var(--color-border);
-    /* Borde sutil para definir el límite */
+    width: 100%;
+    box-sizing: border-box;
+    min-width: 0;
+    /* CRÍTICO para evitar que la tabla fuerce el ancho del card */
 }
 
 .header-container {
@@ -82,7 +88,6 @@ body {
     margin-bottom: 1.5rem;
     border-bottom: 1px solid var(--color-border);
     padding-bottom: 1rem;
-    /* Padding ligeramente menor, 1.5rem era demasiado */
 }
 
 .section-title {
@@ -93,27 +98,21 @@ body {
 
 /* ======================================= */
 /* 2. BOTONES Y ACCIONES */
-/* (Refinamiento de enfoque, accesibilidad y efecto de hover) */
 /* ======================================= */
 
 .btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    /* Centrar el contenido */
     font-weight: 600;
     padding: 0.625rem 1.25rem;
     border-radius: 0.5rem;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
-    /* Sombra mejorada */
     transition: all var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
-    /* Curva de transición más moderna */
     text-decoration: none;
     border: 1px solid transparent;
-    /* Borde para consistencia */
     cursor: pointer;
     line-height: 1.2;
-    /* Permite que el texto respire un poco más */
 }
 
 /* BOTÓN PRIMARIO (Éxito / Creación) */
@@ -126,13 +125,11 @@ body {
     background-color: var(--color-primary-dark);
     box-shadow: 0 4px 12px rgba(5, 150, 105, 0.4);
     transform: translateY(-2px);
-    /* Efecto 3D sutil */
 }
 
 .btn-primary:focus {
     outline: none;
     box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.4);
-    /* Foco de accesibilidad */
 }
 
 /* Iconos en botones */
@@ -140,25 +137,20 @@ body {
     width: 1.15rem;
     height: 1.15rem;
     margin-right: 0.5rem;
-    /* Ajuste de alineación vertical si es necesario, especialmente para SVG */
     flex-shrink: 0;
 }
 
 /* BOTÓN SECUNDARIO (Volver/Cancelar) */
 .btn-secondary {
     background-color: #f3f4f6;
-    /* Gray 100 (más suave que Gray 200) */
     color: var(--color-text-dark);
-    /* Color más oscuro para mejor contraste */
     font-weight: 500;
     box-shadow: none;
     border-color: var(--color-border);
-    /* Añadimos borde para definirlo */
 }
 
 .btn-secondary:hover {
     background-color: #e5e7eb;
-    /* Gray 200 */
     color: var(--color-text-dark);
     transform: none;
     box-shadow: none;
@@ -167,23 +159,24 @@ body {
 .btn-secondary:focus {
     outline: none;
     box-shadow: 0 0 0 4px rgba(107, 114, 128, 0.2);
-    /* Foco de accesibilidad sutil */
 }
 
 /* ======================================= */
 /* 3. TABLAS DE DATOS */
-/* (Mejora de legibilidad y separación visual) */
 /* ======================================= */
 
+/* CRÍTICO: Solución al problema de recorte (scroll horizontal) */
 .table-wrapper {
+    width: 100%;
     overflow-x: auto;
-    /* Permite el scroll horizontal en móviles */
-    margin-top: 1rem;
-    border-radius: 0.5rem;
+    margin-bottom: 2rem;
     border: 1px solid var(--color-border);
+    border-radius: var(--border-radius);
+    padding: 0;
 }
 
 .data-table {
+    /* min-width: 800px; - Esta línea debe evitarse. */
     width: 100%;
     border-collapse: collapse;
 }
@@ -196,14 +189,12 @@ body {
 
 .data-table th {
     padding: 0.9rem 1.5rem;
-    /* Aumento ligero del padding vertical */
     text-align: left;
     font-size: 0.8rem;
     font-weight: 700;
     color: var(--color-primary-dark);
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    /* Más espaciado para mejor legibilidad */
 }
 
 /* Cuerpo (Tbody) */
@@ -212,22 +203,20 @@ body {
     border-bottom: 1px solid var(--color-border);
 }
 
-/* Alternancia de color para mejor lectura */
 .data-table tbody tr:nth-child(even) {
     background-color: #fafafa;
-    /* Gray 50 extra claro */
 }
 
 .data-table tbody tr:hover {
     background-color: #f3f4f6;
-    /* Gray 100 */
 }
 
 .data-table td {
     padding: 1rem 1.5rem;
     font-size: 0.9375rem;
-    white-space: nowrap;
     color: var(--color-text-dark);
+    /* Asegura que el texto largo no fuerce el ancho de la celda */
+    word-break: break-word;
 }
 
 .data-table td:first-child {
@@ -238,14 +227,18 @@ body {
 /* Columna de Acciones */
 .actions-cell {
     width: 1%;
-    min-width: 100px;
+    min-width: 120px;
+    /* Aumento ligero para acomodar 3 iconos */
+    text-align: center;
+    /* Asegura que el contenido se centre */
 }
 
 .action-buttons {
     display: flex;
     gap: 0.75rem;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: center;
+    /* Centrar los botones dentro de la celda */
 }
 
 .action-link {
@@ -253,7 +246,6 @@ body {
     justify-content: center;
     align-items: center;
     width: 1.8rem;
-    /* Tamaño más grande para touch/clic (accesibilidad) */
     height: 1.8rem;
     transition: color 200ms ease, transform 150ms ease;
     border: none;
@@ -265,7 +257,6 @@ body {
 .action-link:hover {
     transform: scale(1.1);
     background-color: rgba(0, 0, 0, 0.05);
-    /* Fondo sutil al hacer hover */
 }
 
 /* Iconos de Acción */
@@ -291,14 +282,22 @@ body {
     text-align: center;
     background-color: var(--color-bg-light);
     border: 2px dashed var(--color-border);
-    /* Borde más visible */
     border-radius: 0.5rem;
     margin-top: 1rem;
+    color: var(--color-text-medium);
+    font-weight: 500;
+}
+
+.empty-icon {
+    width: 3rem;
+    height: 3rem;
+    color: var(--color-border);
+    margin: 0 auto 1rem auto;
+    display: block;
 }
 
 /* ======================================= */
-/* 4. MODAL DE ELIMINACIÓN */
-/* (Mejora de transiciones) */
+/* 4. MODAL DE ELIMINACIÓN (SASS @extend CORREGIDO) */
 /* ======================================= */
 
 .modal-backdrop {
@@ -308,7 +307,6 @@ body {
     right: 0;
     bottom: 0;
     background-color: rgba(17, 24, 39, 0.6);
-    /* Fondo más claro */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -327,16 +325,12 @@ body {
     background-color: var(--color-bg-card);
     border-radius: 0.75rem;
     box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
-    /* Sombra más dramática para el modal */
     padding: 2rem;
     width: 100%;
     max-width: 28rem;
-    /* Ligeramente más ancho */
     transform: translateY(-50px);
-    /* Animación de entrada desde arriba */
     opacity: 0;
     transition: transform 300ms cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 300ms ease;
-    /* Bounce sutil */
 }
 
 .modal-backdrop.show .modal-content {
@@ -346,7 +340,6 @@ body {
 
 .modal-title {
     font-size: 1.5rem;
-    /* Más grande */
     font-weight: 800;
     color: var(--color-danger);
     margin-bottom: 1rem;
@@ -356,7 +349,6 @@ body {
 
 .modal-icon {
     width: 2rem;
-    /* Más grande */
     height: 2rem;
     margin-right: 0.75rem;
 }
@@ -373,24 +365,29 @@ body {
     gap: 0.75rem;
 }
 
-/* Botones de Modal (Reutilizan estilos .btn si es posible, si no, se refinan) */
+/* Botones de Modal: Sustitución de @extend por propiedades reales */
 .btn-cancel,
 .btn-confirm {
-    /* Se unifican los estilos base con .btn-secondary y .btn-primary */
+    display: inline-flex;
+    /* Propiedad heredada de .btn */
+    align-items: center;
+    /* Propiedad heredada de .btn */
+    justify-content: center;
+    /* Propiedad heredada de .btn */
     font-weight: 600;
     padding: 0.625rem 1.25rem;
     border-radius: 0.5rem;
     line-height: 1.2;
-    border: none;
     cursor: pointer;
     transition: all var(--transition-speed) ease;
 }
 
+/* Botón Cancelar (Herencia de .btn-secondary) */
 .btn-cancel {
-    @extend .btn-secondary;
-    /* Uso conceptual: hereda estilos secundarios */
     background-color: #e5e7eb;
     color: var(--color-text-medium);
+    border: 1px solid var(--color-border);
+    box-shadow: none;
 }
 
 .btn-cancel:hover {
@@ -398,11 +395,11 @@ body {
     color: var(--color-text-dark);
 }
 
+/* Botón Confirmar Peligro (Herencia de .btn-primary) */
 .btn-confirm {
-    @extend .btn-primary;
-    /* Uso conceptual: hereda estilos primarios */
     background-color: var(--color-danger);
     color: white;
+    border: 1px solid transparent;
     box-shadow: 0 2px 5px rgba(220, 38, 38, 0.2);
 }
 
@@ -423,7 +420,6 @@ body {
     font-weight: 600;
     display: flex;
     align-items: flex-start;
-    /* Alineación superior para mensajes multilínea */
     gap: 0.75rem;
     border: 1px solid transparent;
 }
@@ -431,7 +427,6 @@ body {
 /* Éxito */
 .flash-success {
     background-color: #ecfdf5;
-    /* Green 50 */
     border-color: var(--color-primary);
     color: var(--color-primary-dark);
 }
@@ -449,7 +444,6 @@ body {
     margin-bottom: 2rem;
     border-radius: 0.5rem;
     background-color: #fef2f2;
-    /* Red 50 */
     border: 1px solid var(--color-danger);
     color: var(--color-danger-dark);
 }
@@ -476,7 +470,7 @@ body {
 
 /* ======================================= */
 /* 6. ESTILOS DE FORMULARIO (CREATE/EDIT) */
-/* (Mejora de la interacción de foco y error) */
+/* (Se corrige form-span-2 a form-group-full) */
 /* ======================================= */
 
 .form-grid {
@@ -491,12 +485,13 @@ body {
     }
 }
 
-.form-span-2 {
+/* Renombrado de form-span-2 a form-group-full para consistencia */
+.form-group-full {
     grid-column: span 1 / span 1;
 }
 
 @media (min-width: 768px) {
-    .form-span-2 {
+    .form-group-full {
         grid-column: span 2 / span 2;
     }
 }
@@ -505,7 +500,6 @@ body {
     display: block;
     font-size: 0.875rem;
     font-weight: 600;
-    /* Ligeramente menos fuerte que 700 */
     color: var(--color-text-dark);
     margin-bottom: 0.4rem;
 }
@@ -515,7 +509,6 @@ body {
 .form-select {
     width: 100%;
     padding: 0.7rem 1rem;
-    /* Padding vertical ligeramente mayor */
     border: 1px solid var(--color-border);
     border-radius: 0.5rem;
     font-size: 1rem;
@@ -532,7 +525,6 @@ body {
     outline: none;
     border-color: var(--color-primary);
     box-shadow: 0 0 0 1px var(--color-primary), 0 0 0 3px rgba(5, 150, 105, 0.3);
-    /* Anillo de foco */
 }
 
 /* Estado de Error para Input (Consistencia) */
@@ -541,7 +533,6 @@ body {
 .form-select.is-invalid {
     border-color: var(--color-danger);
     background-color: #fffafa;
-    /* Fondo muy sutil */
 }
 
 .form-input.is-invalid:focus,
@@ -551,7 +542,8 @@ body {
     box-shadow: 0 0 0 1px var(--color-danger), 0 0 0 3px rgba(220, 38, 38, 0.3);
 }
 
-.input-error-message {
+.form-error-message {
+    /* Corregido de input-error-message a form-error-message */
     font-size: 0.8125rem;
     color: var(--color-danger);
     margin-top: 0.3rem;

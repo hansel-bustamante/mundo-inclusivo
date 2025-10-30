@@ -21,7 +21,7 @@ class AdminUserSeeder extends Seeder
         
         // El método firstOrCreate intentará encontrar el registro. Si no existe, lo creará.
         $personaAdmin = Persona::firstOrCreate(
-            ['id_persona' => 1], // Clave de búsqueda: Buscamos si el ID 1 ya existe
+            ['id_persona' => 100], // Clave de búsqueda: Buscamos si el ID 1 ya existe
             [
                 'nombre' => 'Admin',
                 'apellido_paterno' => 'Global',

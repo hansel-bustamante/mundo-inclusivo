@@ -4,23 +4,37 @@
 
 @section('content')
 <div class="content-card">
-    <h3 class="section-title">Seguimientos Registrados</h3>
+    {{-- Encabezado con título y botón de acción principal --}}
+    <div class="page-header">
+        <h1 class="section-title">Seguimientos Registrados</h1>
 
-    {{-- Botón para registrar nuevo seguimiento --}}
-    <a href="{{ route('seguimiento.create') }}" class="btn btn-primary mb-4 inline-flex items-center">
-        <svg class="btn-icon w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M9 12h6m-3-3v6m-9 5h18a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-        </svg>
-        Registrar Nuevo Seguimiento
-    </a>
+        {{-- Botón para registrar nuevo seguimiento --}}
+        <a href="{{ route('seguimiento.create') }}" class="btn btn-primary">
+            <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 12h6m-3-3v6m-9 5h18a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+            Registrar Nuevo Seguimiento
+        </a>
+    </div>
 
     {{-- Mensajes de éxito o error --}}
     @if (session('success'))
-        <div class="success-alert">{{ session('success') }}</div>
+        {{-- Se reemplaza 'success-alert' por 'flash-message flash-success' --}}
+        <div class="flash-message flash-success">
+            <svg class="flash-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <span>{{ session('success') }}</span>
+        </div>
     @endif
     @if (session('error'))
-        <div class="error-alert">{{ session('error') }}</div>
+        {{-- Se asume un uso simplificado para 'error-alert' si no es un bloque de errores de validación completo --}}
+        <div class="error-alert">
+            <div class="error-header">
+                <svg class="error-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                Error
+            </div>
+            <p>{{ session('error') }}</p>
+        </div>
     @endif
 
     {{-- Tabla de seguimientos --}}
@@ -33,7 +47,8 @@
                     <th>Tipo</th>
                     <th>Actividad Asociada</th>
                     <th>Observaciones (Resumen)</th>
-                    <th class="text-center">Acciones</th>
+                    {{-- Se usa una clase general 'actions-cell' si se necesita centrar, o se deja por defecto 'text-align: left' --}}
+                    <th class="actions-cell">Acciones</th>
                 </tr>
             </thead>
             <tbody>
@@ -42,42 +57,48 @@
                         <td>{{ $seguimiento->id_seguimiento }}</td>
                         <td>{{ \Carbon\Carbon::parse($seguimiento->fecha)->format('d/m/Y') }}</td>
                         <td>
-                            <span class="badge badge-info">{{ $seguimiento->tipo }}</span>
+                            {{-- Se eliminan las clases no definidas 'badge badge-info' y se muestra el tipo directamente --}}
+                            {{ $seguimiento->tipo }}
                         </td>
                         <td>{{ $seguimiento->actividad->nombre }}</td>
                         <td>{{ \Illuminate\Support\Str::limit($seguimiento->observaciones, 70, '...') }}</td>
-                        <td class="text-center actions">
-                            {{-- Botón editar --}}
-                            <a href="{{ route('seguimiento.edit', $seguimiento->id_seguimiento) }}" 
-                               class="btn-action edit inline-flex items-center">
-                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                                     xmlns="http://www.w3.org/2000/svg">
-                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                           d="M15.232 5.232l3.536 3.536m-2.036-5.036
-                                              a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572
-                                              L16.732 3.732z" />
-                                </svg>
-                                Editar
-                            </a>
+                        <td class="actions-cell">
+                            <div class="action-buttons">
+                                {{-- Botón editar: se reemplazan las clases por 'action-link link-edit' --}}
+                                <a href="{{ route('seguimiento.edit', $seguimiento->id_seguimiento) }}" 
+                                    class="action-link link-edit" title="Editar">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15.232 5.232l3.536 3.536m-2.036-5.036
+                                                a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572
+                                                L16.732 3.732z" />
+                                    </svg>
+                                </a>
 
-                            {{-- Botón eliminar --}}
-                            <button type="button" class="btn-action delete inline-flex items-center"
-                                onclick="openDeleteModal('{{ route('seguimiento.destroy', $seguimiento->id_seguimiento) }}')">
-                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                                     xmlns="http://www.w3.org/2000/svg">
-                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                           d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862
-                                              a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22
-                                              M8 7V4a1 1 0 011-1h6a1 1 0 011 1v3" />
-                                </svg>
-                                Eliminar
-                            </button>
+                                {{-- Botón eliminar: se reemplazan las clases por 'action-link link-delete' --}}
+                                <button type="button" class="action-link link-delete" title="Eliminar"
+                                    onclick="openDeleteModal('{{ route('seguimiento.destroy', $seguimiento->id_seguimiento) }}')">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862
+                                                a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22
+                                                M8 7V4a1 1 0 011-1h6a1 1 0 011 1v3" />
+                                    </svg>
+                                </button>
+                            </div>
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="text-center text-gray-600 py-4">
-                            No hay registros de seguimiento creados.
+                        {{-- Se utiliza 'empty-state' para el mensaje de tabla vacía, eliminando estilos no definidos --}}
+                        <td colspan="6">
+                            <div class="empty-state">
+                                {{-- Icono sugerido para estado vacío --}}
+                                <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-3-3v6m-9-6h18a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                                No hay registros de seguimiento creados.
+                            </div>
                         </td>
                     </tr>
                 @endforelse
@@ -109,8 +130,10 @@
             // Token CSRF
             const tokenInput = document.createElement('input');
             tokenInput.type = 'hidden';
+            // Se asume que el token CSRF está disponible globalmente en una etiqueta meta, como es estándar en Laravel.
             tokenInput.name = '_token';
-            tokenInput.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            // NOTA: Para que esto funcione, el layout principal (layouts.main) debe tener: <meta name="csrf-token" content="{{ csrf_token() }}">
+            tokenInput.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content'); 
             form.appendChild(tokenInput);
 
             document.body.appendChild(form);

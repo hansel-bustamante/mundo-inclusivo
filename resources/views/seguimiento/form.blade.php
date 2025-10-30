@@ -1,9 +1,12 @@
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+{{-- 1. Se reemplaza el grid de utilidad por la clase semántica form-grid --}}
+<div class="form-grid">
 
     {{-- 🟦 1. Actividad Asociada --}}
     <div class="form-group">
-        <label for="actividad_id">Actividad Asociada *</label>
-        <select name="actividad_id" id="actividad_id" class="form-control" required>
+        {{-- Se añade la clase form-label --}}
+        <label for="actividad_id" class="form-label">Actividad Asociada *</label>
+        {{-- Se reemplaza form-control por form-select --}}
+        <select name="actividad_id" id="actividad_id" class="form-select" required>
             <option value="">-- Seleccione una Actividad --</option>
 
             @php
@@ -19,30 +22,34 @@
             @endforeach
         </select>
         @error('actividad_id')
-            <p class="error-message">{{ $message }}</p>
+            {{-- Se reemplaza error-message por form-error-message --}}
+            <p class="form-error-message">{{ $message }}</p>
         @enderror
     </div>
 
     {{-- 🟦 2. Fecha del Seguimiento --}}
     <div class="form-group">
-        <label for="fecha">Fecha de Seguimiento *</label>
+        <label for="fecha" class="form-label">Fecha de Seguimiento *</label>
         <input
             type="date"
             name="fecha"
             id="fecha"
-            class="form-control"
+            {{-- Se reemplaza form-control por form-input --}}
+            class="form-input"
             required
             value="{{ old('fecha', $seguimiento->fecha ?? date('Y-m-d')) }}"
         >
         @error('fecha')
-            <p class="error-message">{{ $message }}</p>
+            <p class="form-error-message">{{ $message }}</p>
         @enderror
     </div>
 
-    {{-- 🟦 3. Tipo de Seguimiento --}}
-    <div class="form-group col-span-1 md:col-span-2">
-        <label for="tipo">Tipo de Seguimiento *</label>
-        <select name="tipo" id="tipo" class="form-control" required>
+    {{-- 🟦 3. Tipo de Seguimiento (Ocupa ambas columnas) --}}
+    {{-- Se reemplaza col-span-1 md:col-span-2 por form-group-full --}}
+    <div class="form-group form-group-full">
+        <label for="tipo" class="form-label">Tipo de Seguimiento *</label>
+        {{-- Se reemplaza form-control por form-select --}}
+        <select name="tipo" id="tipo" class="form-select" required>
             <option value="">-- Seleccione el Tipo --</option>
 
             @php
@@ -62,24 +69,26 @@
             @endforeach
         </select>
         @error('tipo')
-            <p class="error-message">{{ $message }}</p>
+            <p class="form-error-message">{{ $message }}</p>
         @enderror
     </div>
 
-    {{-- 🟦 4. Observaciones --}}
-    <div class="form-group col-span-1 md:col-span-2">
-        <label for="observaciones">Observaciones / Detalles del Seguimiento *</label>
+    {{-- 🟦 4. Observaciones (Ocupa ambas columnas) --}}
+    {{-- Se reemplaza col-span-1 md:col-span-2 por form-group-full --}}
+    <div class="form-group form-group-full">
+        <label for="observaciones" class="form-label">Observaciones / Detalles del Seguimiento *</label>
         <textarea
             name="observaciones"
             id="observaciones"
-            class="form-control"
+            {{-- Se reemplaza form-control por form-textarea --}}
+            class="form-textarea"
             rows="4"
             required
             maxlength="1000"
             placeholder="Describe brevemente las observaciones o detalles del seguimiento..."
         >{{ old('observaciones', $seguimiento->observaciones ?? '') }}</textarea>
         @error('observaciones')
-            <p class="error-message">{{ $message }}</p>
+            <p class="form-error-message">{{ $message }}</p>
         @enderror
     </div>
 
