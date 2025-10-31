@@ -68,10 +68,13 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     // 4. PERSONAS
     Route::resource('persona', PersonaController::class);
     // 5. BENEFICIARIOS (Usando id_persona como clave)
+    // ¡IMPORTANTE! Mueve la ruta de búsqueda AQUÍ, antes del resource.
+    Route::get('beneficiario/search-personas', [BeneficiarioController::class, 'searchPersonas'])->name('beneficiario.search_personas');
+    
+    // 5. BENEFICIARIOS (Usando id_persona como clave)
     Route::resource('beneficiario', BeneficiarioController::class)->parameters([
         'beneficiario' => 'id_persona' 
     ]);
-    
     // 6. FICHA DE REGISTRO <-- CORRECCIÓN DE NOMBRE AQUÍ
     Route::resource('ficha-registro', FichaRegistroController::class)->names('ficha_registro');
 

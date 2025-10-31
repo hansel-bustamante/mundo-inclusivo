@@ -5,31 +5,25 @@ namespace App\Http\Controllers;
 use App\Models\Beneficiario;
 use App\Models\Persona; 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB; 
+
 
 class BeneficiarioController extends Controller
 {
-    /**
-     * Muestra una lista de todos los beneficiarios con su información de persona.
-     * CORRECCIÓN: Ahora devuelve la vista Blade.
-     */
     public function index()
     {
         $beneficiarios = Beneficiario::with('persona')->get();
         
         return view('beneficiario.index', compact('beneficiarios'));
     }
-
-    /**
-     * Muestra el formulario para crear un nuevo beneficiario.
-     */
+    
     public function create()
     {
-        return view('beneficiario.create');
+        // Antes: return view('beneficiario.create', compact('personas'));
+        // Ahora:
+        return view('beneficiario.create'); // ¡Sin pasar $personas!
     }
     
-    /**
-     * Almacena un nuevo beneficiario.
-     */
     public function store(Request $request)
     {
         $request->validate([
@@ -41,29 +35,15 @@ class BeneficiarioController extends Controller
 
         return redirect()->route('beneficiario.index')->with('success', 'Beneficiario registrado exitosamente.');
     }
-
-    /**
-     * Muestra un beneficiario específico por su id_persona.
-     */
     public function show($id)
     {
-        // En un CRUD web, show a menudo redirige a edit, o se usa para APIs.
-        // Lo mantendremos como API-style por si lo usas en AJAX:
         return Beneficiario::with('persona')->findOrFail($id);
     }
-
-    /**
-     * Muestra el formulario para editar un beneficiario.
-     */
     public function edit($id)
     {
         $beneficiario = Beneficiario::with('persona')->findOrFail($id);
         return view('beneficiario.edit', compact('beneficiario'));
     }
-
-    /**
-     * Actualiza la información de un beneficiario.
-     */
     public function update(Request $request, $id)
     {
         $beneficiario = Beneficiario::findOrFail($id);
@@ -77,14 +57,51 @@ class BeneficiarioController extends Controller
         return redirect()->route('beneficiario.index')->with('success', 'Tipo de discapacidad actualizado exitosamente.');
     }
 
-    /**
-     * Elimina un beneficiario.
-     */
     public function destroy($id)
     {
         $beneficiario = Beneficiario::findOrFail($id);
         $beneficiario->delete();
 
         return redirect()->route('beneficiario.index')->with('success', 'Beneficiario eliminado exitosamente.');
+    }
+
+    public function searchPersonas(Request $request)
+    {
+        $search = $request->query('q');
+        
+        // Si no hay término de búsqueda, devolvemos un array vacío.
+        if (empty($search)) {
+            return response()->json(['results' => []]);
+        }
+        
+        // Búsqueda robusta en el servidor
+        $personas = Persona::select('id_persona', 'nombre', 'apellido_paterno', 'apellido_materno', 'carnet_identidad')
+            ->where(function ($query) use ($search) {
+                $searchTerm = '%' . $search . '%';
+                
+                // 1. Buscar por Carnet de Identidad
+                $query->where('carnet_identidad', 'LIKE', $searchTerm)
+                      // 2. Buscar por nombre/apellidos concatenados (Suele ser la forma más flexible)
+                      ->orWhere(DB::raw("CONCAT(nombre, ' ', apellido_paterno, ' ', apellido_materno)"), 'LIKE', $searchTerm)
+                      // 3. Buscar por el término en los campos individuales (por si la concatenación falla)
+                      ->orWhere('nombre', 'LIKE', $searchTerm)
+                      ->orWhere('apellido_paterno', 'LIKE', $searchTerm)
+                      ->orWhere('apellido_materno', 'LIKE', $searchTerm);
+            })
+            ->limit(20) // Limita el número de resultados devueltos.
+            ->get();
+            
+        // Formatear los resultados en la estructura que Select2 espera (id y text)
+        $results = $personas->map(function ($persona) {
+            return [
+                'id' => $persona->id_persona,
+                'text' => $persona->nombre . ' ' . $persona->apellido_paterno . ' ' . $persona->apellido_materno . ' (C.I.: ' . $persona->carnet_identidad . ')',
+            ];
+        });
+
+        return response()->json([
+            'results' => $results,
+            'pagination' => ['more' => false]
+        ]);
     }
 }

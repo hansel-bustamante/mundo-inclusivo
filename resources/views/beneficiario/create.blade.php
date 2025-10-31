@@ -28,13 +28,30 @@
         
         <div class="form-grid" style="grid-template-columns: repeat(1, 1fr);">
             
-            {{-- Campo ID_PERSONA --}}
+            {{-- Campo ID_PERSONA - MODIFICADO A SELECT con AJAX --}}
             <div class="form-group">
-                <label for="id_persona" class="form-label">ID de la Persona Existente (*)</label>
-                {{-- NOTA: En un sistema real, esto sería un select 2 o un buscador por C.I. --}}
-                <input type="number" id="id_persona" name="id_persona" 
-                       value="{{ old('id_persona') }}" required 
-                       class="form-input @error('id_persona') is-invalid @enderror">
+                <label for="id_persona" class="form-label">Persona a Convertir en Beneficiario (*)</label>
+
+                {{-- El select debe estar vacío inicialmente --}}
+                <select id="id_persona" name="id_persona" required 
+                        class="form-input @error('id_persona') is-invalid @enderror">
+                    
+                    {{-- Dejamos una opción por defecto para el placeholder --}}
+                    <option value="" disabled selected>-- Escribe el nombre o C.I. de la persona --</option>
+                    
+                    {{-- El contenido se llenará por AJAX --}}
+                    
+                    {{-- Si hubo un error de validación, cargamos el elemento previamente seleccionado: --}}
+                    @if (old('id_persona') && isset($personaSeleccionada))
+                        <option value="{{ old('id_persona') }}" selected>
+                            {{ $personaSeleccionada->nombre }} {{ $personaSeleccionada->apellido_paterno }} (C.I.: {{ $personaSeleccionada->carnet_identidad }})
+                        </option>
+                    @endif
+                    
+                </select>
+                
+                <small class="form-text-muted">Busque a la persona por su nombre o carnet de identidad.</small>
+
                 @error('id_persona')
                     <p class="input-error-message">{{ $message }}</p>
                 @enderror
@@ -63,4 +80,46 @@
         </div>
     </form>
 </div>
+@endsection
+
+{{-- Dentro de resources/views/beneficiario/create.blade.php --}}
+
+@section('scripts')
+<script>
+    $(document).ready(function() {
+        
+        // ¡Implementación con AJAX!
+        $('#id_persona').select2({
+            placeholder: "Escribe el nombre o C.I. de la persona...",
+            allowClear: true,
+            width: '100%',
+            minimumInputLength: 3, // Opcional: Empieza a buscar solo después de 3 caracteres
+            
+            ajax: {
+                // Apunta a la nueva ruta que creamos
+                url: "{{ route('beneficiario.search_personas') }}",
+                dataType: 'json',
+                delay: 250, // Pequeño retraso para evitar inundar el servidor
+                
+                data: function (params) {
+                    return {
+                        q: params.term, // Parámetro de búsqueda, Select2 lo llama 'term'
+                        page: params.page
+                    };
+                },
+                
+                processResults: function (data, params) {
+                    // Seleccionamos los resultados del JSON que retorna el controlador
+                    return {
+                        results: data.results,
+                        pagination: {
+                            more: data.pagination.more // Si hay más resultados para la paginación
+                        }
+                    };
+                },
+                cache: true
+            }
+        });
+    });
+</script>
 @endsection
