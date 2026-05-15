@@ -9,109 +9,134 @@ use Illuminate\Support\Facades\Auth;
 
 class EvaluacionController extends Controller
 {
-    /**
-     * Muestra una lista de todas las evaluaciones.
-     */
     public function index()
     {
-        // Cargamos las evaluaciones junto con la actividad asociada y el usuario evaluador
-        $evaluaciones = Evaluacion::with(['actividad', 'usuario'])->get();
+        $usuario = Auth::user();
+        $query = Evaluacion::with('actividad');
+
+        // Seguridad Lógica M6
+        if ($usuario->rol !== 'admin') {
+            $areaUsuario = $usuario->area_intervencion_id;
+            $query->whereHas('actividad', function($q) use ($areaUsuario) {
+                if ($areaUsuario === 'M6') {
+                    $q->where('area_intervencion_id', 'LIKE', 'M6%');
+                } else {
+                    $q->where('area_intervencion_id', $areaUsuario);
+                }
+            });
+        }
+
+        $evaluaciones = $query->get();
         return view('evaluacion.index', compact('evaluaciones'));
     }
 
-    /**
-     * Muestra el formulario para crear una nueva evaluación.
-     */
-    public function create(Request $request)
+    public function create()
     {
-        // Obtenemos solo las actividades que aún no han sido evaluadas
-        $actividadesConEvaluacion = Evaluacion::pluck('actividad_id');
-        $actividades = Actividad::whereNotIn('id_actividad', $actividadesConEvaluacion)
-                                ->orderBy('fecha', 'desc')->get();
+        $usuario = Auth::user();
         
-        // Obtenemos el ID de la actividad si viene de la URL (al pulsar "Evaluar" desde el listado de Actividades)
-        $actividad_id = $request->get('actividad_id');
-
-        // Si el usuario intentó ir a evaluar una actividad ya evaluada, redirigimos
-        if ($actividad_id && $actividadesConEvaluacion->contains($actividad_id)) {
-             return redirect()->route('actividad.index')->with('error', 'La actividad seleccionada ya cuenta con una evaluación registrada.');
+        if ($usuario->rol === 'admin') {
+            $actividades = Actividad::orderBy('nombre', 'asc')->get();
+        } else {
+            if ($usuario->area_intervencion_id === 'M6') {
+                $actividades = Actividad::where('area_intervencion_id', 'LIKE', 'M6%')
+                                        ->orderBy('nombre', 'asc')
+                                        ->get();
+            } else {
+                $actividades = Actividad::where('area_intervencion_id', $usuario->area_intervencion_id)
+                                        ->orderBy('nombre', 'asc')
+                                        ->get();
+            }
         }
 
-        return view('evaluacion.create', compact('actividades', 'actividad_id'));
+        return view('evaluacion.create', compact('actividades'));
     }
 
-    /**
-     * Almacena una nueva evaluación en la base de datos.
-     */
     public function store(Request $request)
     {
         $request->validate([
+            'actividad_id' => 'required|exists:actividad,id_actividad',
             'fecha' => 'required|date',
-            'descripcion' => 'nullable|string',
-            'resultado' => 'required|in:Cumplido,No cumplido,Parcial', 
-            'ponderacion' => 'nullable|numeric|between:0,5.00',
-            'nivel_aceptacion' => 'nullable|numeric|between:0,100.00',
-            'expectativa_cumplida' => 'nullable|boolean',
-            'actividades_no_cumplidas' => 'nullable|string',
-            'actividad_id' => 'required|exists:actividad,id_actividad|unique:evaluacion,actividad_id', // CRÍTICO: UNIQUE
-            'usuario_id' => 'required|exists:usuario,id_persona', 
+            'resultados_logrados' => 'nullable|string',
+            'dificultades' => 'nullable|string',
+            'recomendaciones' => 'nullable|string',
         ]);
 
-        $data = $request->all();
-        // El checkbox no se envía si no está marcado, forzamos 0 si no existe el campo
-        $data['expectativa_cumplida'] = $request->has('expectativa_cumplida') ? 1 : 0;
-        
-        Evaluacion::create($data);
+        // Seguridad (Lógica M6)
+        if (Auth::user()->rol !== 'admin') {
+            $actividad = Actividad::find($request->actividad_id);
+            $areaUsuario = Auth::user()->area_intervencion_id;
 
-        return redirect()->route('evaluacion.index')->with('success', 'Evaluación registrada con éxito.');
+            if ($areaUsuario === 'M6') {
+                if (!str_starts_with($actividad->area_intervencion_id, 'M6')) abort(403);
+            } else {
+                if ($actividad->area_intervencion_id != $areaUsuario) abort(403);
+            }
+        }
+
+        Evaluacion::create($request->all());
+        return redirect()->route('evaluacion.index')->with('success', 'Evaluación registrada.');
     }
 
-    /**
-     * Muestra el formulario para editar una evaluación existente.
-     */
     public function edit($id)
     {
-        $evaluacion = Evaluacion::with('actividad')->findOrFail($id);
-        // Para el formulario de edición, pasamos solo la actividad evaluada para que el select la muestre
-        $actividades = Actividad::where('id_actividad', $evaluacion->actividad_id)->get();
+        $evaluacion = Evaluacion::findOrFail($id);
+        $usuario = Auth::user();
+
+        if ($usuario->rol !== 'admin') {
+            $areaUsuario = $usuario->area_intervencion_id;
+            $areaActividad = $evaluacion->actividad->area_intervencion_id;
+
+            if ($areaUsuario === 'M6') {
+                if (!str_starts_with($areaActividad, 'M6')) abort(403);
+                $actividades = Actividad::where('area_intervencion_id', 'LIKE', 'M6%')->get();
+            } else {
+                if ($areaActividad != $areaUsuario) abort(403);
+                $actividades = Actividad::where('area_intervencion_id', $areaUsuario)->get();
+            }
+        } else {
+            $actividades = Actividad::all();
+        }
         
         return view('evaluacion.edit', compact('evaluacion', 'actividades'));
     }
 
-    /**
-     * Actualiza una evaluación en la base de datos.
-     */
     public function update(Request $request, $id)
     {
         $evaluacion = Evaluacion::findOrFail($id);
-
-        $request->validate([
-            'fecha' => 'sometimes|required|date',
-            'descripcion' => 'nullable|string',
-            'resultado' => 'sometimes|required|in:Cumplido,No cumplido,Parcial',
-            'ponderacion' => 'nullable|numeric|between:0,5.00',
-            'nivel_aceptacion' => 'nullable|numeric|between:0,100.00',
-            'expectativa_cumplida' => 'nullable|boolean',
-            'actividades_no_cumplidas' => 'nullable|string',
-            'usuario_id' => 'sometimes|required|exists:usuario,id_persona', 
-        ]);
         
-        $data = $request->all();
-        $data['expectativa_cumplida'] = $request->has('expectativa_cumplida') ? 1 : 0;
+        $usuario = Auth::user();
+        if ($usuario->rol !== 'admin') {
+            $areaUsuario = $usuario->area_intervencion_id;
+            $areaActividad = $evaluacion->actividad->area_intervencion_id;
 
-        $evaluacion->update($data);
+            if ($areaUsuario === 'M6') {
+                if (!str_starts_with($areaActividad, 'M6')) abort(403);
+            } else {
+                if ($areaActividad != $areaUsuario) abort(403);
+            }
+        }
 
-        return redirect()->route('evaluacion.index')->with('success', 'Evaluación actualizada con éxito.');
+        $evaluacion->update($request->all());
+        return redirect()->route('evaluacion.index')->with('success', 'Evaluación actualizada.');
     }
 
-    /**
-     * Elimina una evaluación de la base de datos.
-     */
     public function destroy($id)
     {
         $evaluacion = Evaluacion::findOrFail($id);
-        $evaluacion->delete();
+        $usuario = Auth::user();
 
-        return redirect()->route('evaluacion.index')->with('success', 'Evaluación eliminada con éxito.');
+        if ($usuario->rol !== 'admin') {
+            $areaUsuario = $usuario->area_intervencion_id;
+            $areaActividad = $evaluacion->actividad->area_intervencion_id;
+
+            if ($areaUsuario === 'M6') {
+                if (!str_starts_with($areaActividad, 'M6')) abort(403);
+            } else {
+                if ($areaActividad != $areaUsuario) abort(403);
+            }
+        }
+
+        $evaluacion->delete();
+        return redirect()->route('evaluacion.index')->with('success', 'Evaluación eliminada.');
     }
 }

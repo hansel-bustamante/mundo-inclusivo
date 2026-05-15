@@ -15,7 +15,7 @@ class Participante extends Model
 
     protected $fillable = [
         'id_persona',
-        'id_institucion',
+        'id_institucion', // Esto permite que se le pase un valor NULL
     ];
 
     // ************************************************

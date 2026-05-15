@@ -8,14 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 class Persona extends Model
 {
     use HasFactory;
-    
-    // Sobrescribimos el nombre de la tabla
+
     protected $table = 'PERSONA';
-    
-    // Definición de la clave primaria
     protected $primaryKey = 'id_persona';
-    public $incrementing = true; 
     protected $keyType = 'int';
+    public $incrementing = true;
 
     protected $fillable = [
         'nombre',
@@ -26,26 +23,38 @@ class Persona extends Model
         'celular',
         'procedencia',
         'genero',
+        'area_intervencion_id', // <--- ¡ESTO FALTABA! Sin esto, no se guarda.
     ];
 
     public $timestamps = true;
+
+    // ... (resto de tu modelo: mutators y relaciones) ...
     
-    // Relación inversa con Beneficiario (Si es un beneficiario)
-    public function beneficiario()
+    public function areaIntervencion()
     {
-        return $this->hasOne(Beneficiario::class, 'id_persona', 'id_persona');
+        return $this->belongsTo(AreaIntervencion::class, 'area_intervencion_id', 'codigo_area');
     }
 
-    // Relación inversa con Usuario (Si es un usuario/staff)
     public function usuario()
     {
         return $this->hasOne(Usuario::class, 'id_persona', 'id_persona');
     }
 
-    public function actividades()
+    public function beneficiario()
     {
-        return $this->belongsToMany(Actividad::class, 'PARTICIPA_EN', 'id_persona', 'id_actividad')
-                    ->using(ParticipaEn::class)
-                    ->withPivot(['tiene_discapacidad', 'es_familiar', 'firma']);
+        return $this->hasOne(Beneficiario::class, 'id_persona', 'id_persona');
+    }
+    
+    public function afiliacion()
+    {
+        // Una persona tiene un registro único de afiliación en la tabla PARTICIPANTE
+        return $this->hasOne(Participante::class, 'id_persona', 'id_persona');
+    }
+    
+    // Si tienes otra función llamada 'participaciones' apuntando a Participante, ELIMÍNALA.
+    
+    public function participaEnActividades()
+    {
+        return $this->hasMany(ParticipaEn::class, 'id_persona', 'id_persona');
     }
 }

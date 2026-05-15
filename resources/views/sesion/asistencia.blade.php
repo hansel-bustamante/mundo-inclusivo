@@ -5,96 +5,185 @@
 @section('content')
 <div class="content-card">
 
-    {{-- HEADER CON DETALLES DE LA SESIÓN --}}
-    <div class="header-info-panel mb-5 p-4 bg-light-gray rounded-lg shadow-sm">
-        <h3 class="section-title text-xl font-bold mb-1">
-            Gestión de Asistencia | Sesión N°: {{ $sesion->nro_sesion }}
-        </h3>
-        <div class="flex flex-wrap space-x-6 text-sm text-gray-600">
-            <p><strong>Actividad:</strong> {{ $sesion->actividad->nombre }}</p>
-            <p><strong>Fecha:</strong> {{ \Carbon\Carbon::parse($sesion->fecha)->format('d/m/Y') }}</p>
-            <p><strong>Tema:</strong> {{ $sesion->tema }}</p>
+    {{-- HEADER MEJORADO CON INFORMACIÓN DE LA SESIÓN --}}
+    <div class="header-container">
+        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                <h3 class="section-title">Gestión de Asistencia</h3>
+                <span class="badge" style="background: var(--color-primary-light); color: var(--color-primary-dark); padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.75rem; font-weight: 600;">
+                    Sesión N°: {{ $sesion->nro_sesion }}
+                </span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                <span style="color: var(--color-text-medium); font-weight: 500;">
+                    {{ $sesion->actividad->nombre }}
+                </span>
+                <span style="color: var(--color-text-light); font-size: 0.875rem;">
+                    📅 {{ \Carbon\Carbon::parse($sesion->fecha)->format('d/m/Y') }} • 
+                    ⏰ {{ \Carbon\Carbon::parse($sesion->hora_inicio)->format('H:i') }} - {{ \Carbon\Carbon::parse($sesion->hora_fin)->format('H:i') }}
+                </span>
+            </div>
         </div>
     </div>
 
-    {{-- Contenedor para mensajes dinámicos de JS --}}
-    <div id="flash-message-container" class="mb-4"></div>
+    {{-- PANEL INFORMATIVO MEJORADO --}}
+    <div style="background: var(--color-bg-light); padding: 1.5rem; border-radius: var(--border-radius); border: 1px solid var(--color-border); margin-bottom: 2rem;">
+        <div style="display: flex; align-items: flex-start; gap: 1rem;">
+            <svg style="width: 1.5rem; height: 1.5rem; color: var(--color-info); flex-shrink: 0; margin-top: 0.125rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <div>
+                <h5 style="font-family: var(--font-heading); font-weight: 600; color: var(--color-text-dark); margin-bottom: 0.5rem;">Tema de la Sesión</h5>
+                <p style="color: var(--color-text-medium); margin: 0; font-weight: 500;">
+                    {{ $sesion->tema }}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    {{-- CONTENEDOR PARA MENSAJES DINÁMICOS --}}
+    <div id="flash-message-container" style="margin-bottom: 1.5rem;"></div>
     
-    {{-- BARRA DE ACCIONES PRINCIPAL --}}
-    <div class="action-bar flex justify-between items-center mb-6">
+    {{-- BARRA DE ACCIONES PRINCIPAL MEJORADA --}}
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; padding: 1.5rem; background: var(--color-bg-light); border-radius: var(--border-radius); border: 1px solid var(--color-border);">
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <button id="save-all-button" class="btn btn-primary" disabled style="display: flex; align-items: center; gap: 0.5rem;">
+                <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
+                Sincronizar Todos los Cambios
+            </button>
+            
+            {{-- CONTADOR DE CAMBIOS PENDIENTES --}}
+            <div id="pending-changes-counter" style="display: none; background: var(--color-warning); color: var(--color-white); padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.75rem; font-weight: 600;">
+                <span id="changes-count">0</span> cambios pendientes
+            </div>
+        </div>
         
-        {{-- Botón de Sincronización Masiva --}}
-        <button id="save-all-button" class="btn btn-primary" disabled>
-            <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
-            Sincronizar Cambios
-        </button>
-        
-        {{-- Botón de Retorno --}}
-        <a href="{{ route('sesion.index') }}" class="btn btn-secondary">
+        {{-- BOTÓN DE RETORNO --}}
+        <a href="{{ route('sesion.por_actividad', $sesion->id_actividad) }}" class="btn btn-secondary" style="display: flex; align-items: center; gap: 0.5rem;">
             <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
             Volver a Sesiones
         </a>
     </div>
 
-    {{-- TABLA DE ASISTENCIA --}}
-    <div class="table-wrapper shadow-lg rounded-lg overflow-hidden">
-        <table id="asistencia-table" class="data-table min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
+    {{-- ESTADÍSTICAS RÁPIDAS --}}
+    @php
+        $totalParticipantes = $participantesActividad->count();
+        
+        // CORRECCIÓN: Contar solo los que tienen firma=1 explícitamente
+        $asistenciasRegistradasCount = $asistenciasRegistradas->filter(function ($item) {
+            return $item->firma == 1;
+        })->count();
+
+        $porcentajeAsistencia = $totalParticipantes > 0 ? round(($asistenciasRegistradasCount / $totalParticipantes) * 100) : 0;
+    @endphp
+
+    <div class="stats-grid" style="margin-bottom: 2rem;">
+        <div class="stat-card card-border-green">
+            <div class="card-content-header">
+                <span class="card-label">Total Participantes</span>
+                <svg class="card-icon card-icon-green" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+            </div>
+            <div class="card-value">{{ $totalParticipantes }}</div>
+            <div class="card-description">Participantes registrados en la actividad</div>
+        </div>
+        
+        <div class="stat-card card-border-indigo">
+            <div class="card-content-header">
+                <span class="card-label">Asistencia Registrada</span>
+                <svg class="card-icon card-icon-indigo" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+            <div class="card-value">{{ $asistenciasRegistradasCount }}</div>
+            <div class="card-description">Asistencias confirmadas</div>
+        </div>
+        
+        <div class="stat-card card-border-yellow">
+            <div class="card-content-header">
+                <span class="card-label">Porcentaje</span>
+                <svg class="card-icon card-icon-yellow" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+            </div>
+            <div class="card-value">{{ $porcentajeAsistencia }}%</div>
+            <div class="card-description">Tasa de asistencia actual</div>
+        </div>
+    </div>
+
+    {{-- TABLA DE ASISTENCIA MEJORADA --}}
+    <div class="table-wrapper">
+        <table id="asistencia-table" class="data-table">
+            <thead>
                 <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Participante</th>
-                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Firma</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/4">Observaciones</th>
-                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                    {{-- CAMBIO 1: TÍTULO DE COLUMNA --}}
+                    <th style="width: 100px;">C.I.</th>
+                    <th>Participante</th>
+                    <th style="width: 100px; text-align: center;">Estado</th>
+                    <th style="width: 100px; text-align: center;">Firma</th>
+                    <th style="width: 300px;">Observaciones</th>
+                    <th style="width: 120px; text-align: center;">Acciones</th>
                 </tr>
             </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
+            <tbody>
                 @foreach ($participantesActividad as $participante)
                     @php
+                        // 1. Buscamos el registro
                         $asistencia = $asistenciasRegistradas->where('id_persona', $participante->id_persona)->first();
-                        $asistio = $asistencia ? 'Sí' : 'No';
-                        $firma = $asistencia ? ($asistencia->firma ? 1 : 0) : 0;
+                        
+                        // 2. Lógica de estado visual (Solo "Sí" si firma == 1)
+                        $tieneFirma = $asistencia && $asistencia->firma == 1;
+                        
+                        $textoEstado = $tieneFirma ? 'Sí' : 'No';
+                        $claseBadge = $tieneFirma ? 'badge-success' : 'badge-danger';
+                        
+                        $firmaValue = $tieneFirma ? 1 : 0;
                         $observaciones = $asistencia ? $asistencia->observaciones : '';
+                        
+                        // Si existe registro en BD (aunque sea firma 0), está "guardado"
                         $isSaved = $asistencia ? 'true' : 'false';
                     @endphp
 
-                    <tr data-id-persona="{{ $participante->id_persona }}" data-is-saved="{{ $isSaved }}" class="hover:bg-yellow-50 transition duration-150 ease-in-out">
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $participante->id_persona }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ $participante->nombre }} {{ $participante->apellido_paterno }}</td>
+                    {{-- Mantenemos el data-id-persona con el ID real para la lógica JS --}}
+                    <tr data-id-persona="{{ $participante->id_persona }}" data-is-saved="{{ $isSaved }}">
+                        {{-- CAMBIO 2: MOSTRAR CARNET EN LUGAR DE ID --}}
+                        <td style="font-family: var(--font-monospace); color: var(--color-text-medium); font-weight: 600;">
+                            {{ $participante->carnet_identidad }}
+                        </td>
+                        <td style="font-weight: 600; color: var(--color-text-dark);">
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <svg style="width: 1rem; height: 1rem; color: var(--color-text-light);" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                                {{ $participante->nombre }} {{ $participante->apellido_paterno }}
+                            </div>
+                        </td>
                         
-                        {{-- Columna "Estado" (Badge dinámico) --}}
-                        <td class="px-6 py-4 whitespace-nowrap text-center">
-                            <span class="badge badge-{{ $asistencia ? 'success' : 'danger' }} font-semibold text-xs">{{ $asistio }}</span>
+                        <td style="text-align: center;">
+                            <span class="badge {{ $claseBadge }}" style="padding: 0.375rem 0.75rem; border-radius: 1rem; font-size: 0.75rem; font-weight: 600;">
+                                {{ $textoEstado }}
+                            </span>
                         </td>
 
-                        {{-- Columna Checkbox Firma --}}
-                        <td class="px-6 py-4 whitespace-nowrap text-center">
-                            <input type="checkbox" data-pivot="firma" 
-                                class="pivot-input form-checkbox h-5 w-5 text-indigo-600 rounded" 
-                                {{ $firma ? 'checked' : '' }} 
-                                data-initial-value="{{ $firma ? 1 : 0 }}">
+                        <td style="text-align: center;">
+                            <input type="checkbox" 
+                                data-pivot="firma" 
+                                class="pivot-input form-checkbox" 
+                                {{ $tieneFirma ? 'checked' : '' }} 
+                                data-initial-value="{{ $firmaValue }}"
+                                title="Marcar si el participante firmó">
                         </td>
                         
-                        {{-- Columna Observaciones --}}
-                        <td class="px-6 py-4">
-                            <input type="text" data-pivot="observaciones" 
-                                class="form-control pivot-input block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" 
+                        <td>
+                            <input type="text" 
+                                data-pivot="observaciones" 
+                                class="form-input pivot-input" 
                                 value="{{ $observaciones }}"
-                                placeholder="Escriba aquí..."
-                                data-initial-value="{{ $observaciones }}">
+                                placeholder="Observaciones adicionales..."
+                                data-initial-value="{{ $observaciones }}"
+                                style="width: 100%; padding: 0.5rem 0.75rem; font-size: 0.875rem;">
                         </td>
 
-                        {{-- Acciones (Botones de Guardar y Eliminar) --}}
-                        <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                            <div class="flex justify-center space-x-3">
-                                <button class="btn-action-save btn-save-row" disabled title="Guardar cambios de esta fila">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <td style="text-align: center;">
+                            <div class="action-buttons">
+                                <button class="action-link link-edit btn-save-row" disabled title="Guardar cambios de esta fila">
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                     </svg>
                                 </button>
-                                <button class="btn-action-delete btn-delete-row" {{ $isSaved === 'false' ? 'disabled' : '' }} title="Eliminar registro de asistencia">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <button class="action-link link-delete btn-delete-row" {{ $isSaved === 'false' ? 'disabled' : '' }} title="Eliminar registro de asistencia">
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                                     </svg>
                                 </button>
@@ -105,62 +194,58 @@
             </tbody>
         </table>
     </div>
+
+    {{-- LEYENDA DE ESTADOS --}}
+    <div style="margin-top: 2rem; padding: 1rem; background: var(--color-bg-light); border-radius: var(--border-radius); border: 1px solid var(--color-border);">
+        <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+            <span style="font-size: 0.875rem; color: var(--color-text-medium); font-weight: 600;">Leyenda:</span>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span class="badge badge-success" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Sí</span>
+                <span style="font-size: 0.875rem; color: var(--color-text-light);">Asistió a la sesión</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span class="badge badge-danger" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">No</span>
+                <span style="font-size: 0.875rem; color: var(--color-text-light);">No asistió a la sesión</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <svg style="width: 1rem; height: 1rem; color: var(--color-warning);" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <span style="font-size: 0.875rem; color: var(--color-text-light);">Cambios pendientes de guardar</span>
+            </div>
+        </div>
+    </div>
 </div>
 
 <style>
-/* Estilos mejorados para los botones de acción */
-.btn-action-save, .btn-action-delete {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.5rem;
-    height: 2.5rem;
-    border-radius: 0.375rem;
-    border: none;
+.form-checkbox {
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 0.25rem;
+    border: 2px solid var(--color-border);
+    background: var(--color-white);
     cursor: pointer;
-    transition: all 0.2s ease-in-out;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s var(--transition-bounce);
 }
 
-.btn-action-save {
-    background-color: #10b981;
-    color: white;
+.form-checkbox:checked {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
 }
 
-.btn-action-save:hover:not(:disabled) {
-    background-color: #059669;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+.form-checkbox:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(67, 160, 71, 0.1);
 }
 
-.btn-action-save:disabled {
-    background-color: #d1d5db;
-    color: #9ca3af;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
+.badge-success {
+    background: var(--color-primary-light);
+    color: var(--color-primary-dark);
 }
 
-.btn-action-delete {
-    background-color: #ef4444;
-    color: white;
+.badge-danger {
+    background: rgba(229, 57, 53, 0.1);
+    color: var(--color-danger-dark);
 }
 
-.btn-action-delete:hover:not(:disabled) {
-    background-color: #dc2626;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.btn-action-delete:disabled {
-    background-color: #d1d5db;
-    color: #9ca3af;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-}
-
-/* Spinner para carga */
 .loading-spinner {
     display: inline-block;
     width: 1rem;
@@ -171,96 +256,161 @@
     animation: spin 1s linear infinite;
 }
 
-.loading-spinner-sm {
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Estilos para filas con cambios pendientes */
+tr.changed {
+    background: rgba(253, 216, 53, 0.05) !important;
+    border-left: 3px solid var(--color-warning);
+}
+
+/* Estilos para botones de acción en estado loading */
+.action-link.loading {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.action-link.loading svg {
+    display: none;
+}
+
+.action-link.loading::after {
+    content: '';
     display: inline-block;
-    width: 0.75rem;
-    height: 0.75rem;
+    width: 1rem;
+    height: 1rem;
     border: 2px solid transparent;
     border-top: 2px solid currentColor;
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
 
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .table-wrapper {
+        overflow-x: auto;
+    }
+    
+    .data-table {
+        min-width: 800px;
+    }
+    
+    .header-container {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
 }
 </style>
 
 <script>
-// El script JavaScript se mantiene **igual** ya que su lógica es correcta, 
-// solo se han actualizado los estilos de los elementos HTML que manipula.
 document.addEventListener('DOMContentLoaded', function() {
     const table = document.getElementById('asistencia-table');
     const saveAllButton = document.getElementById('save-all-button');
     const flashContainer = document.getElementById('flash-message-container');
+    const pendingChangesCounter = document.getElementById('pending-changes-counter');
+    const changesCount = document.getElementById('changes-count');
     const idSesion = {{ $sesion->id_sesion }};
-    const apiRoute = '/api/asistencia-sesion'; // Ruta API correcta
+    const apiRoute = '/api/asistencia-sesion';
 
-    // Función para mostrar mensajes de éxito/error (similar a participantes.blade.php)
+    // Función para mostrar mensajes flash
     function showFlashMessage(type, message) {
         flashContainer.innerHTML = '';
         const alertDiv = document.createElement('div');
-        // Usamos las clases de alerta existentes
-        alertDiv.className = type === 'success' ? 'success-alert' : 'error-alert';
-        alertDiv.innerHTML = `<span>${message}</span>`;
+        alertDiv.className = type === 'success' ? 'flash-message flash-success' : 
+                            type === 'error' ? 'flash-message flash-danger' : 
+                            'flash-message flash-info';
+        alertDiv.innerHTML = `
+            <svg class="flash-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${type === 'success' ? 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' : 
+                                                                                           type === 'error' ? 'M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' : 
+                                                                                           'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'}"></path>
+            </svg>
+            <span>${message}</span>
+        `;
         flashContainer.appendChild(alertDiv);
         setTimeout(() => alertDiv.remove(), 5000);
     }
 
-    // ----------------------------------------------------
-    // 1. Detección de Cambios
-    // ----------------------------------------------------
+    // Actualizar contador de cambios pendientes
+    function updatePendingChangesCounter() {
+        const changedRows = table.querySelectorAll('tr.changed').length;
+        changesCount.textContent = changedRows;
+        
+        if (changedRows > 0) {
+            pendingChangesCounter.style.display = 'flex';
+            saveAllButton.disabled = false;
+        } else {
+            pendingChangesCounter.style.display = 'none';
+            saveAllButton.disabled = true;
+        }
+    }
+
+    // Verificar cambios en una fila
+    function checkRowChanges(row) {
+        let isChanged = false;
+        row.querySelectorAll('.pivot-input').forEach(input => {
+            const isCheckbox = input.type === 'checkbox';
+            const currentValue = isCheckbox ? (input.checked ? '1' : '0') : input.value;
+            if (currentValue !== input.dataset.initialValue) {
+                isChanged = true;
+            }
+        });
+
+        const saveButton = row.querySelector('.btn-save-row');
+        saveButton.disabled = !isChanged;
+
+        if (isChanged) {
+            row.classList.add('changed');
+        } else {
+            row.classList.remove('changed');
+        }
+
+        updatePendingChangesCounter();
+    }
+
+    // Detección de cambios
     table.addEventListener('input', function(event) {
         if (event.target.classList.contains('pivot-input')) {
             const row = event.target.closest('tr');
-            const saveButton = row.querySelector('.btn-save-row');
-            
-            let isChanged = false;
-            // Verifica si algún campo de la fila ha cambiado
-            row.querySelectorAll('.pivot-input').forEach(input => {
-                const isCheckbox = input.type === 'checkbox';
-                const currentValue = isCheckbox ? (input.checked ? '1' : '0') : input.value;
-                if (currentValue !== input.dataset.initialValue) {
-                    isChanged = true;
-                }
-            });
-
-            saveButton.disabled = !isChanged;
-            
-            // Habilitar/Deshabilitar el botón de Guardar Todo
-            const changedRows = table.querySelectorAll('tr[data-id-persona] .btn-save-row:not([disabled])').length;
-            saveAllButton.disabled = changedRows === 0;
+            checkRowChanges(row);
         }
     });
 
-    // ----------------------------------------------------
-    // 2. Operación de Guardado/Actualización de Fila Única
-    // ----------------------------------------------------
+    table.addEventListener('change', function(event) {
+        if (event.target.classList.contains('pivot-input')) {
+            const row = event.target.closest('tr');
+            checkRowChanges(row);
+        }
+    });
+
+    // Guardar fila individual
     table.addEventListener('click', function(event) {
         if (event.target.closest('.btn-save-row')) {
             const saveButton = event.target.closest('.btn-save-row');
-            const row = saveButton.closest('tr');
-            saveButton.disabled = true;
-            
-            // Reemplazamos el ícono con un spinner/texto temporal
-            const originalContent = saveButton.innerHTML;
-            saveButton.innerHTML = '<span class="loading-spinner"></span>';
+            if (saveButton.disabled) return;
 
+            const row = saveButton.closest('tr');
             const idPersona = row.dataset.idPersona;
             
-            // 1. Obtener los datos actuales de la fila
+            saveButton.classList.add('loading');
+            saveButton.disabled = true;
+
             const data = {
                 id_sesion: idSesion,
                 id_persona: idPersona,
-                // Si el checkbox está marcado, el registro se considera "asistido"
-                firma: row.querySelector('input[data-pivot="firma"]').checked ? 1 : 0, 
+                firma: row.querySelector('input[data-pivot="firma"]').checked ? 1 : 0,
                 observaciones: row.querySelector('input[data-pivot="observaciones"]').value,
             };
 
-            // 2. Llamada POST (updateOrCreate)
             fetch(apiRoute, {
-                method: 'POST', // Usamos POST para updateOrCreate en el controlador
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
@@ -274,55 +424,50 @@ document.addEventListener('DOMContentLoaded', function() {
                 return response.json();
             })
             .then(data => {
-                showFlashMessage('success', `Asistencia de ${idPersona} guardada/actualizada.`);
+                showFlashMessage('success', `Asistencia de ${idPersona} guardada correctamente.`);
                 
-                // Actualizar el estado visual de la fila
+                // Actualizar estado visual
                 row.dataset.isSaved = 'true';
-                row.querySelector('.badge').className = 'badge badge-success font-semibold text-xs';
-                row.querySelector('.badge').textContent = 'Sí';
+                const badge = row.querySelector('.badge');
+                badge.className = 'badge badge-success';
+                badge.textContent = 'Sí';
                 row.querySelector('.btn-delete-row').disabled = false;
                 
-                // Resetear los valores iniciales para futuros cambios
+                // Actualizar valores iniciales
                 row.querySelectorAll('.pivot-input').forEach(input => {
                     const isCheckbox = input.type === 'checkbox';
                     input.dataset.initialValue = isCheckbox ? (input.checked ? '1' : '0') : input.value;
                 });
 
-                saveButton.disabled = true;
-                saveButton.innerHTML = originalContent; // Restaurar ícono
-
-                // Reevaluar el botón de Guardar Todo
-                const changedRows = table.querySelectorAll('tr[data-id-persona] .btn-save-row:not([disabled])').length;
-                saveAllButton.disabled = changedRows === 0;
+                row.classList.remove('changed');
+                updatePendingChangesCounter();
             })
             .catch(error => {
                 showFlashMessage('error', `Error al guardar ${idPersona}: ${error.message}`);
-                console.error(error);
                 saveButton.disabled = false;
-                saveButton.innerHTML = originalContent;
+            })
+            .finally(() => {
+                saveButton.classList.remove('loading');
             });
         }
     });
 
-    // ----------------------------------------------------
-    // 3. Operación de Eliminación de Fila Única
-    // ----------------------------------------------------
+    // Eliminar fila individual
     table.addEventListener('click', function(event) {
         if (event.target.closest('.btn-delete-row')) {
             const deleteButton = event.target.closest('.btn-delete-row');
+            if (deleteButton.disabled) return;
+
             const row = deleteButton.closest('tr');
             const idPersona = row.dataset.idPersona;
 
-            if (!confirm(`¿Estás seguro de que deseas eliminar la asistencia de ${idPersona} a la sesión ${idSesion}?`)) {
+            if (!confirm(`¿Estás seguro de que deseas eliminar la asistencia de ${idPersona}?`)) {
                 return;
             }
 
+            deleteButton.classList.add('loading');
             deleteButton.disabled = true;
-            
-            const originalContent = deleteButton.innerHTML;
-            deleteButton.innerHTML = '<span class="loading-spinner-sm"></span>'; 
 
-            // Ruta DELETE con clave compuesta
             fetch(`${apiRoute}/${idSesion}/${idPersona}`, {
                 method: 'DELETE',
                 headers: {
@@ -333,140 +478,108 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (response.status === 204) {
                     showFlashMessage('success', `Asistencia de ${idPersona} eliminada correctamente.`);
                     
-                    // Resetear el estado visual de la fila a NO ASISTIÓ
+                    // Resetear estado visual
                     row.dataset.isSaved = 'false';
-                    row.querySelector('.badge').className = 'badge badge-danger font-semibold text-xs';
-                    row.querySelector('.badge').textContent = 'No';
+                    const badge = row.querySelector('.badge');
+                    badge.className = 'badge badge-danger';
+                    badge.textContent = 'No';
                     
-                    // Resetear campos de entrada
                     row.querySelector('input[data-pivot="firma"]').checked = false;
                     row.querySelector('input[data-pivot="observaciones"]').value = '';
                     
-                    // Resetear valores iniciales a "No asistió"
                     row.querySelectorAll('.pivot-input').forEach(input => {
                         const isCheckbox = input.type === 'checkbox';
                         input.dataset.initialValue = isCheckbox ? '0' : '';
                     });
-                    
-                    // Deshabilitar botón de eliminar (ya no hay registro en DB)
-                    deleteButton.disabled = true;
-                    deleteButton.innerHTML = originalContent;
-                    
-                    // El botón de guardar individual seguirá deshabilitado si no hay cambios
+
+                    row.classList.remove('changed');
+                    updatePendingChangesCounter();
                 } else if (response.status === 404) {
-                    showFlashMessage('error', `El registro de asistencia para ${idPersona} no fue encontrado. Posiblemente ya fue eliminado.`);
+                    showFlashMessage('error', `El registro de asistencia para ${idPersona} no fue encontrado.`);
                 } else {
                     return response.json().then(err => { throw new Error(err.message || 'Error de servidor'); });
-                }
-                
-                if (response.status !== 204) {
-                     // Solo restaurar el botón si hubo un error (para reintentar)
-                    deleteButton.disabled = false;
-                    deleteButton.innerHTML = originalContent;
                 }
             })
             .catch(error => {
                 showFlashMessage('error', `Error al eliminar ${idPersona}: ${error.message}`);
-                console.error(error);
                 deleteButton.disabled = false;
-                deleteButton.innerHTML = originalContent;
+            })
+            .finally(() => {
+                deleteButton.classList.remove('loading');
             });
         }
     });
-    
-    // ----------------------------------------------------
-    // 4. Operación de Guardado Masivo
-    // ----------------------------------------------------
+
+    // Guardado masivo
     saveAllButton.addEventListener('click', function() {
+        const changedRows = Array.from(table.querySelectorAll('tr.changed'));
+        if (changedRows.length === 0) return;
+
         saveAllButton.disabled = true;
-        
         const originalContent = saveAllButton.innerHTML;
-        saveAllButton.innerHTML = '<svg class="btn-icon animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m15.356 2H20v-5"></path></svg> Sincronizando...';
+        saveAllButton.innerHTML = '<span class="loading-spinner" style="margin-right: 0.5rem;"></span> Sincronizando...';
 
-        const rowsToSave = [];
-        table.querySelectorAll('tr[data-id-persona]').forEach(row => {
-            const saveButton = row.querySelector('.btn-save-row');
-            if (!saveButton.disabled) {
-                // Si el botón individual no está deshabilitado, hay cambios
-                const idPersona = row.dataset.idPersona;
-                const data = {
-                    id_sesion: idSesion,
-                    id_persona: idPersona,
-                    firma: row.querySelector('input[data-pivot="firma"]').checked ? 1 : 0,
-                    observaciones: row.querySelector('input[data-pivot="observaciones"]').value,
-                };
-                rowsToSave.push({ row, data });
-                
-                // Deshabilitar botón individual mientras se guarda
-                saveButton.disabled = true;
-                saveButton.innerHTML = '<span class="loading-spinner"></span>';
-            }
-        });
+        const promises = changedRows.map(row => {
+            const idPersona = row.dataset.idPersona;
+            const data = {
+                id_sesion: idSesion,
+                id_persona: idPersona,
+                firma: row.querySelector('input[data-pivot="firma"]').checked ? 1 : 0,
+                observaciones: row.querySelector('input[data-pivot="observaciones"]').value,
+            };
 
-        if (rowsToSave.length === 0) {
-            showFlashMessage('info', 'No hay cambios para sincronizar.');
-            saveAllButton.disabled = true; // Mantenerlo deshabilitado si no hay cambios
-            saveAllButton.innerHTML = originalContent;
-            return;
-        }
-
-        // Ejecutar todas las promesas de guardado
-        Promise.all(rowsToSave.map(item => {
-            const saveButton = item.row.querySelector('.btn-save-row');
             return fetch(apiRoute, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                 },
-                body: JSON.stringify(item.data)
+                body: JSON.stringify(data)
             })
             .then(response => {
-                const isSuccess = response.ok;
-                if (!isSuccess) {
-                    return response.json().then(err => { throw new Error(err.message || 'Error de servidor'); });
+                if (!response.ok) {
+                    throw new Error(`Error en ${idPersona}`);
                 }
                 return response.json();
             })
-            .then(data => {
-                // Actualizar el estado de la fila si fue exitoso
-                item.row.dataset.isSaved = 'true';
-                item.row.querySelector('.badge').className = 'badge badge-success font-semibold text-xs';
-                item.row.querySelector('.badge').textContent = 'Sí';
-                item.row.querySelector('.btn-delete-row').disabled = false;
-
-                // Actualizar initial-value para futuros cambios
-                item.row.querySelectorAll('.pivot-input').forEach(input => {
+            .then(() => {
+                // Actualizar estado visual de la fila
+                row.dataset.isSaved = 'true';
+                const badge = row.querySelector('.badge');
+                badge.className = 'badge badge-success';
+                badge.textContent = 'Sí';
+                row.querySelector('.btn-delete-row').disabled = false;
+                
+                row.querySelectorAll('.pivot-input').forEach(input => {
                     const isCheckbox = input.type === 'checkbox';
                     input.dataset.initialValue = isCheckbox ? (input.checked ? '1' : '0') : input.value;
                 });
-                
-                saveButton.innerHTML = item.row.querySelector('.btn-delete-row').previousElementSibling.innerHTML; // Restaurar ícono
-                
-                return { status: 'success', data: data };
+
+                row.classList.remove('changed');
+                return { success: true, idPersona };
             })
             .catch(error => {
-                console.error('Error en operación:', error);
-                // Re-habilitar el botón individual en caso de error
-                saveButton.disabled = false;
-                saveButton.innerHTML = item.row.querySelector('.btn-delete-row').previousElementSibling.innerHTML;
-                return { status: 'error', error: error.message, data: item.data };
+                return { success: false, idPersona, error: error.message };
             });
-        }))
-        .then(results => {
-            const totalSuccess = results.filter(r => r.status === 'success').length;
-            const totalError = results.filter(r => r.status === 'error').length;
+        });
 
-            if (totalError > 0) {
-                showFlashMessage('error', `Sincronización completada. ${totalSuccess} exitoso(s), ${totalError} error(es). Revisa la consola para detalles.`);
+        Promise.all(promises).then(results => {
+            const successful = results.filter(r => r.success).length;
+            const failed = results.filter(r => !r.success).length;
+
+            if (failed === 0) {
+                showFlashMessage('success', `Todas las ${successful} asistencias fueron sincronizadas exitosamente.`);
             } else {
-                showFlashMessage('success', 'Todas las asistencias han sido sincronizadas exitosamente.');
+                showFlashMessage('error', `Sincronización completada: ${successful} exitosas, ${failed} con errores.`);
             }
 
-            saveAllButton.disabled = true;
+            updatePendingChangesCounter();
             saveAllButton.innerHTML = originalContent;
         });
     });
+
+    // Inicializar contador
+    updatePendingChangesCounter();
 });
 </script>
 @endsection

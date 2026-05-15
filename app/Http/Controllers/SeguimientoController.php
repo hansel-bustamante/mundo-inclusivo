@@ -5,79 +5,141 @@ namespace App\Http\Controllers;
 use App\Models\Seguimiento;
 use App\Models\Actividad;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Auth;
 
 class SeguimientoController extends Controller
 {
-    /**
-     * Muestra la lista de todos los Seguimientos.
-     */
     public function index()
     {
-        $seguimientos = Seguimiento::with('actividad')->orderBy('fecha', 'desc')->get();
+        $usuario = Auth::user();
+        $query = Seguimiento::with('actividad');
+
+        // SEGURIDAD: Lógica M6
+        if ($usuario->rol !== 'admin') {
+            $areaUsuario = $usuario->area_intervencion_id;
+            if ($areaUsuario) {
+                $query->whereHas('actividad', function($q) use ($areaUsuario) {
+                    if ($areaUsuario === 'M6') {
+                        $q->where('area_intervencion_id', 'LIKE', 'M6%');
+                    } else {
+                        $q->where('area_intervencion_id', $areaUsuario);
+                    }
+                });
+            } else {
+                $query->where('id_seguimiento', 0);
+            }
+        }
+
+        $seguimientos = $query->orderBy('created_at', 'desc')->paginate(15);
         return view('seguimiento.index', compact('seguimientos'));
     }
 
-    /**
-     * Muestra el formulario para crear un nuevo Seguimiento.
-     */
     public function create()
     {
-        // Se listan las actividades para asociar el seguimiento
-        $actividades = Actividad::orderBy('fecha', 'desc')->get();
+        $usuario = Auth::user();
+        
+        // FILTRO CRÍTICO PARA EL SELECT (Lógica M6)
+        if ($usuario->rol === 'admin') {
+            $actividades = Actividad::orderBy('nombre')->get();
+        } else {
+            if ($usuario->area_intervencion_id === 'M6') {
+                $actividades = Actividad::where('area_intervencion_id', 'LIKE', 'M6%')
+                                        ->orderBy('nombre')->get();
+            } else {
+                $actividades = Actividad::where('area_intervencion_id', $usuario->area_intervencion_id)
+                                        ->orderBy('nombre')->get();
+            }
+        }
+
         return view('seguimiento.create', compact('actividades'));
     }
 
-    /**
-     * Almacena un nuevo Seguimiento en la base de datos.
-     */
     public function store(Request $request)
     {
         $request->validate([
-            'fecha' => 'required|date',
-            // Valida que el campo 'tipo' sea uno de los valores definidos
-            'tipo' => ['required', 'string', 'max:50', Rule::in(['Visita Domiciliaria', 'Llamada Telefónica', 'Reunión Presencial', 'Otro'])],
-            'observaciones' => 'required|string|max:1000',
-            'actividad_id' => 'required|exists:ACTIVIDAD,id_actividad',
+            'id_actividad' => 'required|exists:actividad,id_actividad',
+            'descripcion' => 'required|string',
+            'fecha_seguimiento' => 'required|date',
+            'tipo' => 'required|string'
         ]);
 
-        Seguimiento::create($request->all());
+        // Seguridad al guardar (Lógica M6)
+        if (Auth::user()->rol !== 'admin') {
+            $actividad = Actividad::find($request->id_actividad);
+            $areaUsuario = Auth::user()->area_intervencion_id;
 
-        return redirect()->route('seguimiento.index')->with('success', 'Seguimiento registrado exitosamente.');
+            if ($areaUsuario === 'M6') {
+                if (!str_starts_with($actividad->area_intervencion_id, 'M6')) abort(403);
+            } else {
+                if ($actividad->area_intervencion_id != $areaUsuario) abort(403);
+            }
+        }
+
+        Seguimiento::create($request->all());
+        return redirect()->route('seguimiento.index')->with('success', 'Seguimiento registrado.');
     }
 
-    /**
-     * Muestra el formulario para editar un Seguimiento existente.
-     */
-    public function edit(Seguimiento $seguimiento)
+    public function edit($id)
     {
-        $actividades = Actividad::orderBy('fecha', 'desc')->get();
+        $seguimiento = Seguimiento::findOrFail($id);
+        $usuario = Auth::user();
+
+        // Seguridad al editar (Lógica M6)
+        if ($usuario->rol !== 'admin') {
+            $areaUsuario = $usuario->area_intervencion_id;
+            $areaActividad = $seguimiento->actividad->area_intervencion_id;
+
+            if ($areaUsuario === 'M6') {
+                if (!str_starts_with($areaActividad, 'M6')) abort(403);
+                $actividades = Actividad::where('area_intervencion_id', 'LIKE', 'M6%')->get();
+            } else {
+                if ($areaActividad != $areaUsuario) abort(403);
+                $actividades = Actividad::where('area_intervencion_id', $areaUsuario)->get();
+            }
+        } else {
+            $actividades = Actividad::all();
+        }
+
         return view('seguimiento.edit', compact('seguimiento', 'actividades'));
     }
 
-    /**
-     * Actualiza un Seguimiento en la base de datos.
-     */
-    public function update(Request $request, Seguimiento $seguimiento)
+    public function update(Request $request, $id)
     {
-        $request->validate([
-            'fecha' => 'sometimes|required|date',
-            'tipo' => ['sometimes', 'required', 'string', 'max:50', Rule::in(['Visita Domiciliaria', 'Llamada Telefónica', 'Reunión Presencial', 'Otro'])],
-            'observaciones' => 'sometimes|required|string|max:1000',
-            'actividad_id' => 'sometimes|required|exists:ACTIVIDAD,id_actividad',
-        ]);
+        $seguimiento = Seguimiento::findOrFail($id);
+        $usuario = Auth::user();
+        
+        if ($usuario->rol !== 'admin') {
+            $areaUsuario = $usuario->area_intervencion_id;
+            $areaActividad = $seguimiento->actividad->area_intervencion_id;
+
+            if ($areaUsuario === 'M6') {
+                if (!str_starts_with($areaActividad, 'M6')) abort(403);
+            } else {
+                if ($areaActividad != $areaUsuario) abort(403);
+            }
+        }
 
         $seguimiento->update($request->all());
-
-        return redirect()->route('seguimiento.index')->with('success', 'Seguimiento actualizado exitosamente.');
+        return redirect()->route('seguimiento.index')->with('success', 'Actualizado correctamente.');
     }
 
-    /**
-     * Elimina un Seguimiento de la base de datos.
-     */
-    public function destroy(Seguimiento $seguimiento)
+    public function destroy($id)
     {
+        $seguimiento = Seguimiento::findOrFail($id);
+        $usuario = Auth::user();
+        
+        if ($usuario->rol !== 'admin') {
+            $areaUsuario = $usuario->area_intervencion_id;
+            $areaActividad = $seguimiento->actividad->area_intervencion_id;
+
+            if ($areaUsuario === 'M6') {
+                if (!str_starts_with($areaActividad, 'M6')) abort(403);
+            } else {
+                if ($areaActividad != $areaUsuario) abort(403);
+            }
+        }
+
         $seguimiento->delete();
-        return redirect()->route('seguimiento.index')->with('success', 'Seguimiento eliminado.');
+        return redirect()->route('seguimiento.index')->with('success', 'Eliminado.');
     }
 }

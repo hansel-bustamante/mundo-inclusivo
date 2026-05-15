@@ -24,29 +24,29 @@ class AdminUserSeeder extends Seeder
             ['id_persona' => 100], // Clave de búsqueda: Buscamos si el ID 1 ya existe
             [
                 'nombre' => 'Admin',
-                'apellido_paterno' => 'Global',
-                'apellido_materno' => 'Sistema', // Solución al primer error
-                'carnet_identidad' => '00000000',
+                'apellido_paterno' => 'Mundo',
+                'apellido_materno' => 'Inclusivo', // Solución al primer error
+                'carnet_identidad' => '10084126',
                 'genero' => 'M',
-                'fecha_nacimiento' => '1990-01-01',
-                'celular' => '59170000000',      // Solución al error de celular
-                'procedencia' => 'Sede Central', // Solución al error de procedencia
+                'fecha_nacimiento' => '2002-08-13',
+                'celular' => '77217411',      // Solución al error de celular
+                'procedencia' => 'La Paz', // Solución al error de procedencia
             ]
         );
 
         // 2. VERIFICAR SI EL USUARIO YA EXISTE
-        $existingAdmin = Usuario::where('nombre_usuario', 'admin_global')->first();
+        $existingAdmin = Usuario::where('nombre_usuario', 'hansel.bustamante')->first();
 
         if (!$existingAdmin) {
             
             // 3. CREAR EL USUARIO
             Usuario::create([
                 'id_persona' => $personaAdmin->id_persona, 
-                'nombre_usuario' => 'admin_global',
+                'nombre_usuario' => 'hansel.bustamante',
                 // La contraseña se hasheará automáticamente gracias al mutator en el modelo Usuario
-                'contrasena' => 'contrasena123', 
+                'contrasena' => 'ScissorSeven7721', 
                 'rol' => 'admin',
-                'correo' => 'admin@mundoinclusivo.com',
+                'correo' => 'hanselbustamantehb@gmail.com',
                 'area_intervencion_id' => null, // El admin global no necesita un área
             ]);
             

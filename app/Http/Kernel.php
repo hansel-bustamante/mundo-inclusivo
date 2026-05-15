@@ -45,8 +45,8 @@ class Kernel extends HttpKernel
         ],
     ];
 
-    /**
-     * The application's middleware aliases.
+/**
+     * The application's route middleware aliases.
      *
      * Aliases may be used to conveniently assign middleware to routes and groups.
      *
@@ -65,9 +65,18 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
     ];
 
-        protected $routeMiddleware = [
-        // ... otros middlewares
-        'admin' => \App\Http\Middleware\AdminMiddleware::class, // <-- NUEVO REGISTRO
+
+    protected $routeMiddleware = [
+        // ... otros middlewares que ya tenías
+        'admin' => \App\Http\Middleware\AdminMiddleware::class, // Este ya estaba
+        
+        // ***********************************************
+        // CRÍTICO: Registros Añadidos para Coordinador y Registrador
+        // ***********************************************
+        'coordinador' => \App\Http\Middleware\CoordinadorMiddleware::class,
+        'registrador' => \App\Http\Middleware\RegistradorMiddleware::class, 
+        'role' => \App\Http\Middleware\RoleMiddleware::class,
+        'force.change' => \App\Http\Middleware\ForcePasswordChange::class,
     ];
 
 }

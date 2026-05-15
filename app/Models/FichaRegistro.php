@@ -28,8 +28,8 @@ class FichaRegistro extends Model
     // Relaciones
     public function beneficiario()
     {
-        // Se relaciona con Participante (tabla PARTICIPANTE), usando id_persona
-        return $this->belongsTo(Participante::class, 'beneficiario_id', 'id_persona');
+        // CORRECCIÓN: Debe apuntar al modelo Beneficiario, NO a Participante
+        return $this->belongsTo(Beneficiario::class, 'beneficiario_id', 'id_persona');
     }
 
     public function usuario()

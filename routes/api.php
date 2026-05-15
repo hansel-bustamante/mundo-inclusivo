@@ -18,6 +18,9 @@ use App\Http\Controllers\CodigoActividadController;
 use App\Http\Controllers\AreaIntervencionController;
 use App\Http\Controllers\InstitucionController;
 use App\Http\Controllers\PersonaController;
+use App\Http\Controllers\ApiController;
+
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -59,4 +62,11 @@ Route::delete('participa_en/{id_persona}/{id_actividad}', [ParticipaEnController
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
+});
+
+Route::post('/login', [ApiController::class, 'login']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/sync/download', [ApiController::class, 'download']);
+    Route::post('/sync/upload', [ApiController::class, 'upload']);
 });

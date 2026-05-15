@@ -2,19 +2,21 @@
 
 namespace App\Models;
 
+// 1. IMPORTACIONES OBLIGATORIAS
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use App\Models\Persona; // Asegurar que Persona se use para la relación
-use App\Models\AreaIntervencion; // Asegurar que AreaIntervencion se use para la relación
+use Illuminate\Notifications\Notifiable; // <--- ESTA ES LA QUE TE FALTABA
+use Laravel\Sanctum\HasApiTokens;        // <--- ESTA ES PARA EL LOGIN APP
 
 class Usuario extends Authenticatable
 {
-    use HasFactory;
-    
-    // CRÍTICO: Sobrescribimos el nombre de la tabla por defecto ('users')
+    // 2. USO DE LOS TRAITS
+    use HasApiTokens, HasFactory, Notifiable; 
+
+    // CONFIGURACIÓN DE LA TABLA
     protected $table = 'USUARIO';
     
-    // Definición de la clave primaria (que es foránea a PERSONA)
+    // Definición de la clave primaria (si no es 'id')
     protected $primaryKey = 'id_persona';
     public $incrementing = false; 
     protected $keyType = 'int';
@@ -25,14 +27,15 @@ class Usuario extends Authenticatable
         'contrasena',
         'rol',
         'correo',
-        'area_intervencion_id'
+        'area_intervencion_id',
+        'must_change_password'
     ];
 
     public $timestamps = true;
     
-    // CRÍTICO: Ocultamos el campo 'contrasena' y lo definimos como oculto
     protected $hidden = [
         'contrasena',
+        'remember_token',
     ];
 
     /**

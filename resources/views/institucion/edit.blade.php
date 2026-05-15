@@ -4,11 +4,20 @@
 
 @section('content')
     
-    <div class="page-header">
-        <h1 class="section-title">Editar Institución: **{{ $institucion->nombre_institucion }}**</h1>
-        
-        <a href="{{ route('institucion.index') }}" class="btn btn-secondary">
-            <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 17l-5-5m0 0l5-5m-5 5h12"></path></svg>
+    <div class="header-container">
+        <div>
+            <h3 class="section-title">Editar Institución</h3>
+            <div style="display: flex; align-items: center; gap: 1rem; margin-top: 0.5rem; flex-wrap: wrap;">
+                <span class="badge" style="background: var(--color-primary-light); color: var(--color-primary-dark); padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.75rem; font-weight: 600;">
+                    ID: {{ $institucion->id_institucion }}
+                </span>
+                <span style="color: var(--color-text-medium); font-weight: 500;">
+                    {{ $institucion->nombre_institucion }}
+                </span>
+            </div>
+        </div>
+        <a href="{{ route('institucion.index') }}" class="btn btn-secondary" style="display: flex; align-items: center; gap: 0.5rem;">
+            <svg style="width: 1.25rem; height: 1.25rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
             Volver al Listado
         </a>
     </div>
@@ -16,10 +25,10 @@
     <div class="content-card">
 
         @if ($errors->any())
-            <div class="error-alert">
+            <div class="error-alert" style="margin-bottom: 2rem;">
                 <div class="error-header">
-                    <svg class="error-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.3 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                    <span class="error-title">Parece que hay problemas con la información proporcionada.</span>
+                    <svg class="error-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    <span class="error-title">Errores en el formulario</span>
                 </div>
                 <ul class="error-list">
                     @foreach ($errors->all() as $error)
@@ -29,85 +38,254 @@
             </div>
         @endif
 
+        {{-- INFORMACIÓN ACTUAL --}}
+        <div style="background: var(--color-bg-light); padding: 1.5rem; border-radius: var(--border-radius); border: 1px solid var(--color-border); margin-bottom: 2rem;">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <svg style="width: 1.5rem; height: 1.5rem; color: var(--color-info); flex-shrink: 0;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div>
+                    <h5 style="font-family: var(--font-heading); font-weight: 600; color: var(--color-text-dark); margin-bottom: 0.25rem;">Editando información de:</h5>
+                    <p style="color: var(--color-text-medium); margin: 0; font-weight: 500;">
+                        {{ $institucion->nombre_institucion }} • {{ $institucion->tipo }} • {{ $institucion->municipio }}
+                    </p>
+                </div>
+            </div>
+        </div>
+
         <form action="{{ route('institucion.update', $institucion) }}" method="POST">
             @csrf
-            @method('PUT') 
+            @method('PUT')
 
             <div class="form-grid">
                 
                 {{-- CAMPO REQUERIDO: nombre_institucion --}}
                 <div class="form-group">
-                    <label for="nombre_institucion" class="form-label">Nombre de la Institución</label>
+                    <label for="nombre_institucion" class="form-label">
+                        <span style="color: var(--color-danger);">*</span> Nombre de la Institución
+                    </label>
                     <input type="text" id="nombre_institucion" name="nombre_institucion" 
                            class="form-input @error('nombre_institucion') is-invalid @enderror" 
                            value="{{ old('nombre_institucion', $institucion->nombre_institucion) }}" 
+                           placeholder="Ej: Hospital Nacional de Niños"
                            required>
                     @error('nombre_institucion')
-                        <p class="input-error-message">{{ $message }}</p>
+                        <div class="form-error-message">
+                            <svg style="width: 1rem; height: 1rem; margin-right: 0.25rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            {{ $message }}
+                        </div>
                     @enderror
                 </div>
                 
                 {{-- CAMPO REQUERIDO: tipo --}}
                 <div class="form-group">
-                    <label for="tipo" class="form-label">Tipo de Institución</label>
+                    <label for="tipo" class="form-label">
+                        <span style="color: var(--color-danger);">*</span> Tipo de Institución
+                    </label>
                     <select id="tipo" name="tipo" 
                              class="form-input @error('tipo') is-invalid @enderror" 
                              required>
                         @php $currentType = old('tipo', $institucion->tipo); @endphp
-                        <option value="" disabled>Seleccione un tipo</option>
+                        <option value="">-- Seleccione un tipo --</option>
                         <option value="Privada" {{ $currentType == 'Privada' ? 'selected' : '' }}>Privada</option>
                         <option value="Pública" {{ $currentType == 'Pública' ? 'selected' : '' }}>Pública</option>
                         <option value="ONG" {{ $currentType == 'ONG' ? 'selected' : '' }}>ONG / Fundación</option>
                         <option value="Mixta" {{ $currentType == 'Mixta' ? 'selected' : '' }}>Mixta</option>
                     </select>
                     @error('tipo')
-                        <p class="input-error-message">{{ $message }}</p>
+                        <div class="form-error-message">
+                            <svg style="width: 1rem; height: 1rem; margin-right: 0.25rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            {{ $message }}
+                        </div>
                     @enderror
                 </div>
                 
                 {{-- CAMPO REQUERIDO: municipio --}}
                 <div class="form-group">
-                    <label for="municipio" class="form-label">Municipio</label>
+                    <label for="municipio" class="form-label">
+                        <span style="color: var(--color-danger);">*</span> Municipio
+                    </label>
                     <input type="text" id="municipio" name="municipio" 
                            class="form-input @error('municipio') is-invalid @enderror" 
                            value="{{ old('municipio', $institucion->municipio) }}" 
+                           placeholder="Ej: La Paz"
                            required>
                     @error('municipio')
-                        <p class="input-error-message">{{ $message }}</p>
+                        <div class="form-error-message">
+                            <svg style="width: 1rem; height: 1rem; margin-right: 0.25rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            {{ $message }}
+                        </div>
                     @enderror
                 </div>
                 
-                {{-- CAMPO REQUERIDO: telefono (¡CAMBIO A REQUIRED!) --}}
+                {{-- CAMPO REQUERIDO: telefono --}}
                 <div class="form-group">
-                    <label for="telefono" class="form-label">Teléfono</label>
+                    <label for="telefono" class="form-label">
+                        <span style="color: var(--color-danger);">*</span> Teléfono
+                    </label>
                     <input type="text" id="telefono" name="telefono" 
                            class="form-input @error('telefono') is-invalid @enderror" 
                            value="{{ old('telefono', $institucion->telefono) }}"
-                           required> {{-- Se añade el atributo required --}}
+                           placeholder="Ej: +591 77777777"
+                           required>
                     @error('telefono')
-                        <p class="input-error-message">{{ $message }}</p>
+                        <div class="form-error-message">
+                            <svg style="width: 1rem; height: 1rem; margin-right: 0.25rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            {{ $message }}
+                        </div>
                     @enderror
                 </div>
 
                 {{-- CAMPO OPCIONAL: direccion --}}
-                <div class="form-group form-span-2">
-                    <label for="direccion" class="form-label">Dirección (Opcional)</label>
+                <div class="form-group-full">
+                    <label for="direccion" class="form-label">Dirección</label>
                     <input type="text" id="direccion" name="direccion" 
                            class="form-input @error('direccion') is-invalid @enderror" 
-                           value="{{ old('direccion', $institucion->direccion) }}">
+                           value="{{ old('direccion', $institucion->direccion) }}"
+                           placeholder="Ej: Av. Principal #123 (opcional)">
                     @error('direccion')
-                        <p class="input-error-message">{{ $message }}</p>
+                        <div class="form-error-message">
+                            <svg style="width: 1rem; height: 1rem; margin-right: 0.25rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            {{ $message }}
+                        </div>
                     @enderror
                 </div>
             </div>
+
+            {{-- ADVERTENCIA SOBRE ACTUALIZACIONES --}}
+            <div style="background: #fff3cd; padding: 1.5rem; border-radius: var(--border-radius); border: 1px solid #ffeaa7; margin: 2rem 0;">
+                <div style="display: flex; align-items: flex-start; gap: 1rem;">
+                    <svg style="width: 1.5rem; height: 1.5rem; color: #856404; flex-shrink: 0; margin-top: 0.125rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    <div>
+                        <h5 style="font-family: var(--font-heading); font-weight: 600; color: #856404; margin-bottom: 0.5rem;">Importante</h5>
+                        <p style="color: #856404; font-size: 0.875rem; margin: 0;">
+                            Los cambios realizados aquí se reflejarán inmediatamente en el sistema. 
+                            Asegúrese de que la información sea correcta antes de guardar.
+                        </p>
+                    </div>
+                </div>
+            </div>
             
-            <div class="form-actions">
-                <button type="submit" class="btn btn-primary">
-                    <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.047 12.004 12.004 0 00-1.29 11.026 12.004 12.004 0 001.29 11.026A11.955 11.955 0 0112 2.944z"></path></svg>
+            <div class="form-actions" style="border-top: 1px solid var(--color-border); padding-top: 2rem; margin-top: 2rem;">
+                <a href="{{ route('institucion.index') }}" class="btn btn-secondary" style="display: flex; align-items: center; gap: 0.5rem;">
+                    <svg style="width: 1.25rem; height: 1.25rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    Cancelar
+                </a>
+                <button type="submit" class="btn btn-primary" style="display: flex; align-items: center; gap: 0.5rem;">
+                    <svg style="width: 1.25rem; height: 1.25rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                     Guardar Cambios
                 </button>
             </div>
         </form>
 
     </div>
+
+    <style>
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .form-group-full {
+            grid-column: 1 / -1;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--color-text-dark);
+            font-size: 0.875rem;
+        }
+        
+        .form-input:focus {
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(67, 160, 71, 0.1);
+            transform: translateY(-1px);
+        }
+        
+        .form-input.is-invalid {
+            border-color: var(--color-danger);
+            background-color: #fef2f2;
+        }
+        
+        .form-error-message {
+            display: flex;
+            align-items: center;
+            color: var(--color-danger);
+            font-size: 0.8125rem;
+            margin-top: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .badge {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 1.25rem;
+            }
+            
+            .header-container {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Formatear automáticamente el campo de teléfono
+            const telefonoInput = document.getElementById('telefono');
+            telefonoInput.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length > 0) {
+                    if (value.length <= 8) {
+                        value = value.substring(0, 8);
+                    } else {
+                        value = value.substring(0, 11);
+                    }
+                }
+                e.target.value = value;
+            });
+
+            // Validación en tiempo real para campos requeridos
+            const requiredInputs = document.querySelectorAll('input[required], select[required]');
+            requiredInputs.forEach(input => {
+                input.addEventListener('blur', function() {
+                    if (!this.value) {
+                        this.classList.add('is-invalid');
+                    } else {
+                        this.classList.remove('is-invalid');
+                    }
+                });
+            });
+
+            // Capitalizar automáticamente el nombre de la institución
+            const nombreInput = document.getElementById('nombre_institucion');
+            nombreInput.addEventListener('blur', function() {
+                if (this.value) {
+                    this.value = this.value.replace(/\b\w/g, function(l) {
+                        return l.toUpperCase();
+                    });
+                }
+            });
+
+            // Capitalizar automáticamente el municipio
+            const municipioInput = document.getElementById('municipio');
+            municipioInput.addEventListener('blur', function() {
+                if (this.value) {
+                    this.value = this.value.replace(/\b\w/g, function(l) {
+                        return l.toUpperCase();
+                    });
+                }
+            });
+        });
+    </script>
 @endsection

@@ -12,7 +12,10 @@ return new class extends Migration {
     {
         Schema::create('participante', function (Blueprint $table) {
             $table->unsignedBigInteger('id_persona')->primary();
-            $table->unsignedBigInteger('id_institucion');
+            
+            // ✅ CORRECCIÓN CRÍTICA: Se añade ->nullable()
+            $table->unsignedBigInteger('id_institucion')->nullable(); 
+
             $table->foreign('id_persona')->references('id_persona')->on('persona')->onDelete('cascade');
             $table->foreign('id_institucion')->references('id_institucion')->on('institucion')->onDelete('cascade');
             $table->timestamps();

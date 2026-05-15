@@ -40,6 +40,20 @@ class Actividad extends Model
     }
 
     // ******************************************************
+    // RELACIÓN UNO A MUCHOS (ACTUALIZACIÓN PARA CORREGIR EL ERROR)
+    // ******************************************************
+    /**
+     * Una Actividad tiene muchas Sesiones.
+     * La clave foránea es 'id_actividad' en el modelo Sesion.
+     */
+    public function sesiones() // <-- ¡ESTA ES LA RELACIÓN QUE FALTABA!
+    {
+        // Se relaciona con Sesion, usando 'id_actividad' como clave foránea en la tabla SESION,
+        // y 'id_actividad' como clave local en esta tabla (ACTVIDAD).
+        return $this->hasMany(Sesion::class, 'id_actividad', 'id_actividad');
+    }
+
+    // ******************************************************
     // ¡CORRECCIÓN! RELACIÓN UNO A UNO CON EVALUACION (AÑADIDA)
     // ******************************************************
     public function evaluacion()

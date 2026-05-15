@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Relations\Pivot;
+use Illuminate\Support\Facades\Log;
 
 class ParticipaEn extends Pivot
 {
@@ -65,5 +66,9 @@ class ParticipaEn extends Pivot
             ->delete();
     }
 
-
+    public function afiliacion()
+    {
+        // ParticipaEn se relaciona con Participante a través de id_persona
+        return $this->hasOne(Participante::class, 'id_persona', 'id_persona');
+    }
 }
