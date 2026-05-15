@@ -1,8 +1,8 @@
-# Sistema de Gestión y Seguimiento "Mundo Inclusivo" - Cáritas Coroico ♿🌐
+# Sistema de Gestión y Seguimiento "Mundo Inclusivo" - Cáritas Coroico
 
 Este proyecto es una solución integral (Web y Móvil) diseñada para digitalizar y optimizar la gestión de beneficiarios con discapacidad. Desarrollado como Proyecto de Grado para la **Universidad Mayor de San Andrés (UMSA)**, el sistema permite centralizar la información, automatizar reportes y realizar seguimientos en zonas rurales sin conexión a internet.
 
-## 🚀 Características Principales
+## Características Principales
 
 * **Gestión Centralizada (CRUD):** Registro completo de beneficiarios, tutores e instituciones.
 * **Sincronización Offline-First:** Aplicación móvil que permite el registro de datos en campo sin internet y sincronización automática posterior.
@@ -10,7 +10,7 @@ Este proyecto es una solución integral (Web y Móvil) diseñada para digitaliza
 * **Arquitectura Robusta:** Implementación del patrón Modelo-Vista-Controlador (MVC).
 * **Seguridad:** Sistema de autenticación con roles de usuario y encriptación de datos sensibles.
 
-## 🛠️ Stack Tecnológico
+## Stack Tecnológico
 
 ### Backend & Web
 * **Framework:** Laravel 10
@@ -28,7 +28,7 @@ Este proyecto es una solución integral (Web y Móvil) diseñada para digitaliza
 * **Ingeniería Web:** UWE (UML-based Web Engineering)
 * **Calidad de Software:** ISO/IEC 9126
 
-## 📋 Requisitos de Instalación
+## Requisitos de Instalación
 
 1.  Clonar el repositorio: `git clone https://github.com/hansel-bustamante/mundo-inclusivo.git`
 2.  Instalar dependencias de PHP: `composer install`
